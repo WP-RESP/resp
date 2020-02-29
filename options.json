@@ -1,0 +1,27 @@
+{
+    "resp_development_mode": {
+        "label": "Development-Mode",
+        "description": "Enable Developer tools.",
+        "default": false
+    },
+    "resp_maintenance_mode": {
+        "label": "Maintenance-Mode",
+        "description": "Show \"Under Construction\" page.",
+        "default": true
+    },
+    "resp_no_jquery": {
+        "label": "No-jQuery",
+        "description": "Remove jQuery library.",
+        "default": false
+    },
+    "resp_tags_default_classes": {
+        "label": "Default Classes",
+        "description": "Add default classes to the elements.",
+        "default": true
+    },
+    "resp_isolation" : {
+        "label": "Isolation",
+        "description": "Isolate filters and classes.",
+        "default": true
+    }
+}
