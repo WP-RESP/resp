@@ -23,5 +23,10 @@
         "label": "Isolation",
         "description": "Isolate filters and classes.",
         "default": true
+    },
+    "resp_api_modules" : {
+        "label": "RESP API",
+        "description": "Use RESP API modules.",
+        "default": false
     }
 }

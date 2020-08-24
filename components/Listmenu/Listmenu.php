@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp\Components;
@@ -51,7 +49,17 @@ class ListMenu extends Component
             return;
         }
 
-        register_nav_menus(self::$menus);
+        $menus = self::$menus;
+
+        array_walk($menus, function(&$item , $key){
+
+            if(is_array($item)){
+                $item = __($item["description"]) ?? $key;
+            }
+
+        });
+
+        register_nav_menus($menus);
     }
 
 
@@ -217,28 +225,62 @@ class ListMenu extends Component
     function listmenuShortcode($atts = [], $content = null)
     {
 
-        extract(shortcode_atts(
-            array(
-                'menu' => '',
-                'container' => 'div',
-                'container_class' => "",
-                'container_id' => '',
-                'menu_class' => "",
-                'menu_id' => '',
-                'echo' => true,
-                'fallback_cb' => 'wp_page_menu',
-                'before' => '',
-                'after' => '',
-                'link_before' => '',
-                'link_after' => '',
-                'depth' => 0,
-                'walker' => '',
-                'theme_location' => ''
-            ),
-            $atts
-        ));
+        $menuLoc = $atts["menu"] ?? ($atts["theme_location"] ?? "");
 
-        $m = sanitize_title(!empty($menu) ? $menu : $menu_id);
+        if(!has_nav_menu($menuLoc)){
+            return;
+        }
+
+        $confParams = [
+            'container' ,
+            'container_class' ,
+            'container_id' ,
+            'menu_class' ,
+            'menu_id' ,
+            'before' ,
+            'after' ,
+            'link_before',
+            'link_after'
+        ];
+
+        $defParams = [
+            'menu' => '',
+            'container' => "div",
+            'container_class' => "",
+            'container_id' => '',
+            'menu_class' => "" ,
+            'menu_id' => '',
+            'echo' => true,
+            'fallback_cb' => 'wp_page_menu',
+            'before' => '',
+            'after' => '',
+            'link_before' => '',
+            'link_after' => '',
+            'depth' => 0,
+            'walker' => '',
+            'theme_location' => ''
+        ];
+
+        if(!empty($menuLoc)){
+
+            array_walk($defParams , function(&$item , $key) use ($confParams , $menuLoc){
+
+                if(in_array($key , $confParams)){
+
+                    $item = self::$menus[$menuLoc][$key] ?? $item;
+
+                } 
+    
+            });
+
+        }
+
+
+        extract(shortcode_atts($defParams , $atts));
+
+
+        $m = sanitize_title($menu ?: $menu_id);
+
 
         $nav = wp_nav_menu(array(
             'menu' => $menu,

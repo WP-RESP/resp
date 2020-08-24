@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp;
@@ -23,11 +21,10 @@ class RespWalkerComment extends \Walker_Comment
         $selector = $name == "author" ? "comment_author" : "comment_author_$name";
 
         $container = Core::tag("div", "comments-form-$name-container", "", [
-            "class" => "comment-form-$name"
+            "class" => "comments-form-$name"
         ]);
 
-
-        $inputLabel = Core::tag("label", "comments-form-$name-label", __('Name'), [
+        $inputLabel = Core::tag("label", "comments-form-$name-label", $label, [
             "attr" => [
                 "for" => "$name"
             ]
@@ -46,8 +43,8 @@ class RespWalkerComment extends \Walker_Comment
             ], $attr, ($req  ? ["required" => "required"] : []))
         ]);
 
-
         return $container->append([$inputLabel, $input]);
+
     }
 
 
@@ -86,41 +83,65 @@ class RespWalkerComment extends \Walker_Comment
 
 
 
-        $fields = array(
-            'author' => self::generateField("author", __('Name'), "text", $req, $commenter, [
+        $fields = [
+            'author' => self::generateField("author", __('Name' , RESP_TEXT_DOMAIN), "text", $req, $commenter, [
                 "maxlength" => 245,
                 "size" => 30
             ])->toString(),
-            'email'  => self::generateField("email", __('Email'), "email", $req, $commenter, [
+            'email'  => self::generateField("email", __('Email' , RESP_TEXT_DOMAIN), "email", $req, $commenter, [
                 "maxlength" => 100,
                 "size" => 30,
                 "aria-describedby" => "email-notes"
-            ])->toString(),
-            'url' => self::generateField("url", __('Website'), "url", false, $commenter, [
+            ])->toString()
+        ];
+
+        $url = __resp_tp("comments-form-url" , true);
+
+        if($url) {
+            $fields['url'] = self::generateField("url", __('Website' , RESP_TEXT_DOMAIN), "url", false, $commenter, [
                 "maxlength" => 200,
                 "size" => 30
-            ])->toString()
-        );
+            ])->toString();
+        }
 
         if (has_action('set_comment_cookies', 'wp_set_comment_cookies') && get_option('show_comments_cookies_opt_in')) {
 
-            $consent = empty($commenter['comment_author_email']) ? '' : ' checked="checked"';
+            $id = "wp-comment-cookies-consent";
 
-            $cookieLabel = Core::tag("label", "comments-form-cookies-consent-label",  __('Save my name, email, and website in this browser for the next time I comment.'), [
+            $inputInsideLabel = __resp_tp("comments-form-cookies-consent-input-in-label" , true);
+
+            $consent = empty($commenter['comment_author_email']) ? false : true;
+
+            $cookieLabel = Core::tag("label", "comments-form-cookies-consent-label",  __('Save my name, email, and website in this browser for the next time I comment.' , RESP_TEXT_DOMAIN), [
                 "attr" => [
-                    "for" => "wp-comment-cookies-consent"
+                    "for" => $id
                 ]
+            ])->appendContent();
+
+            $cookieInput = Core::tag("input", "comments-form-cookies-consent-input", null, [
+                "id" => $id,
+                "attr" => array_merge([
+                    "name" => $id,
+                    "type" => "checkbox",
+                    "value" => "yes",
+                ], ($consent  ? ["checked" => "checked"] : []))
             ]);
 
+            $container = Core::tag("div", "comments-form-cookies-consent-container", "", [
+                "class" => "comments-form-cookies-consent"
+            ]);
 
-            $cookieLabel->prepend(sprintf(
-                '<input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"%s />',
-                $consent
-            ));
+            
+            
+            if($inputInsideLabel){
+                $cookieLabel->append($cookieInput);
+                $container->append($cookieLabel);
+            }else{
+                $container->append( [$cookieInput , $cookieLabel] );
+            }
 
 
-            $fields['cookies'] = Core::tag("div", "comments-form-cookies-consent-container", "")
-                ->append($cookieLabel)->toString();
+            $fields['cookies'] = $container->toString();
 
 
             // Ensure that the passed fields include cookies consent.
@@ -195,6 +216,8 @@ class RespWalkerComment extends \Walker_Comment
             'format'               => 'xhtml',
         );
 
+
+
         /**
          * Filters the comment form default arguments.
          *
@@ -222,7 +245,7 @@ class RespWalkerComment extends \Walker_Comment
 
         Core::trigger("comments-form-before-container", true);
 
-        Core::tag("div", "comments-form", "", [
+        Core::tag("div", "comments-form-wrap", "", [
             "id" => "respond"
         ])->eo();
 
@@ -339,6 +362,12 @@ class RespWalkerComment extends \Walker_Comment
                 ];
             } else {
 
+                $inputRows = __resp_tp("comments-form-textarea-rows", 4);
+
+                $inputCols = __resp_tp("comments-form-textarea-cols", 45);
+
+                $maxLength = __resp_tp("comments-form-textarea-maxlength", 65525);
+
                 $cf = Core::tag("div", "comments-form-textarea-container", "", [
                     "children" => [
                         Tag::labelFor("comment", _x('Comment', 'noun')),
@@ -346,9 +375,9 @@ class RespWalkerComment extends \Walker_Comment
                             "id" => "comment",
                             "attr" => [
                                 "name" => "comment",
-                                "cols" => 45,
-                                "rows" => 8,
-                                "maxlength" => 65525,
+                                "cols" => $inputCols,
+                                "rows" => $inputRows,
+                                "maxlength" => $maxLength,
                                 "required" => "required"
                             ]
                         ])
@@ -397,14 +426,16 @@ class RespWalkerComment extends \Walker_Comment
                     echo apply_filters('comment_form_field_comment', $field);
 
                     echo $args['comment_notes_after'];
+
                 } elseif (!is_user_logged_in()) {
 
                     if ($first_field === $name) {
+
+                        Core::trigger("comments-form-before-inputs", true);
+
                         /**
                          * Fires before the comment fields in the comment form, excluding the textarea.
                          */
-
-
                         do_action('comment_form_before_fields');
                     }
 
@@ -419,15 +450,17 @@ class RespWalkerComment extends \Walker_Comment
                     echo apply_filters("comment_form_field_{$name}", $field) . "\n";
 
                     if ($last_field === $name) {
+
                         /**
                          * Fires after the comment fields in the comment form, excluding the textarea.
                          * 
                          */
                         do_action('comment_form_after_fields');
 
-                        Core::trigger("comments-form-after-fields", true);
+                        Core::trigger("comments-form-after-inputs", true);
                     }
                 }
+
             }
 
             Core::trigger("comments-form-after-fields", true);
@@ -519,7 +552,9 @@ class RespWalkerComment extends \Walker_Comment
 
         Core::trigger("comments-list-before-container", true);
 
-        Core::tag($listStyle, "comments-list", "")->eo();
+        Core::tag($listStyle, "comments-list", "" , [
+            "class" => ["comments-list"]
+        ])->eo();
 
         wp_list_comments([
             'walker'      => new \Resp\RespWalkerComment(),
@@ -566,13 +601,10 @@ class RespWalkerComment extends \Walker_Comment
 
         $commentID = get_comment_ID();
 
-
         Core::tag($tag, "comments-list-item", "", [
             "id" => "comment-$commentID",
             "class" => get_comment_class($this->has_children ? 'parent' : '', $comment)
         ])->eo();
-
-
 
         if ('div' != $args['style']) {
             Core::tag("div", "comments-list-item-body", "", [
@@ -663,9 +695,6 @@ class RespWalkerComment extends \Walker_Comment
     }
 
 
-
-
-
     /*
     protected function html5_comment($comment, $depth, $args)
     {
@@ -684,18 +713,15 @@ class RespWalkerComment extends \Walker_Comment
             $moderation_note = __( 'Your comment is awaiting moderation. This is a preview, your comment will be visible after it has been approved.' );
         }
 
-
         Core::tag($tag , "comments-item-container" , "" , [
             "id" => "comment-" . get_comment_ID(),
             "class" => $this->has_children ? "parent" : ""
         ])->eo();
 
-
         Core::tag("article" , "comments-item-body" , "" , [
             "id" => "comment-" . get_comment_ID(),
             "class" => "comment-body"
         ])->eo();
-
 
         Tag::create("footer")->add_class("comment-meta")->eo();
 

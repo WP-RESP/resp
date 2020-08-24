@@ -1,25 +1,48 @@
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
-((r, d, $) => {
 
-    r.ready(initEditors);
+; (function(r, d , $){
 
-    function initEditors() {
-        if(d.settingsTab != "edit"){
-            return;
+    var RESPAdminAPI = function(){
+        var apis = [];
+    };
+
+    RESPAdminAPI.prototype.editors = [
+        { 
+            selector : "#resp_theme_data" ,
+            options : d.admin.editor.json
+        },
+        {
+            selector : "#resp_script" ,
+            options : d.admin.editor.javascript
         }
-        if (d.codeEditor) {
-            r.query('#resp_theme_data', (e) => {
-                wp.codeEditor.initialize($(e), d.codeEditor.jsonEditor);
-            });
-            r.query('#resp_script', (e) => {
-                wp.codeEditor.initialize($(e), d.codeEditor.scriptEditor);
-            });
-        }
+    ];
+
+    RESPAdminAPI.prototype.api = function(n , c){
+        this.apis.push({
+            name: n,
+            callback: c
+        });
     }
 
-})(RESP, RESP_DATA, jQuery)
+    r.ready(init);
+
+    function init(){
+       
+        window.respAdminApi = new RESPAdminAPI();
+        
+        window.respAdminApi.editors.forEach(elem => {
+            
+            r.query(elem.selector , (e) => {
+                if(!r.hasClass(e , 'hidden')){
+                    wp.codeEditor.initialize($(e), elem.options);
+                }
+            });
+
+        });
+
+    }
+
+})(RESP, RESP_DATA ,jQuery);

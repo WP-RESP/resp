@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
-defined('ABSPATH') or die;
 
+defined('ABSPATH') or die;
 
 /** 
  * @since 0.9.0
@@ -24,7 +24,12 @@ function __resp_init()
         "base/Component",  
         "ThemeBuilder", 
         "walkers/RespWalkerComment",
+        "ConstantLoader",
+        "AdvancedSettings",
+        "ThemeOptionWrapper",
+        "ThemeConfigPlaceholder",
         "ThemeOptions", 
+        "Communicator",
         "Core"
         ] as $source) {
             $path = __DIR__ .  "/includes/{$source}.php";
@@ -152,11 +157,11 @@ function __resp_master_sidebar_disabled($name)
 {
     global $page_namespace;
 
-    $nosidebar = isset($_REQUEST['no{$name}']) || defined("{$page_namespace}--no-{$name}");
+    $nosidebar = isset($_REQUEST['no{$name}']) || __resp_tp("no-{$name}" , false);
 
-    $nomaster = isset($_REQUEST['nomaster']) || defined("{$page_namespace}--no-master");
+    $nomaster = isset($_REQUEST['nomaster']) || __resp_tp("no-master" , false);
 
-    return $nomaster || $nosidebar;
+    return apply_filters( "resp--master-sidebar-disabled" , $nomaster || $nosidebar );
 }
 
 
@@ -185,11 +190,7 @@ function __resp_tp($name , $default)
  */
 function __resp_wp_notice($message, $type = "info", $dismissible = true)
 {
-    add_action('admin_notices', function() use ($message , $type , $dismissible){
-        \Resp\Tag::notice($message , $type , $dismissible)->e();
-    });
+    \Resp\Communicator::notice($message , $type , $dismissible);
 }
-
-
 
 __resp_init();

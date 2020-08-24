@@ -1,18 +1,20 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp\Components;
 
-use Resp\Component, Resp\Tag, Resp\ThemeBuilder, Resp\ThemeOptions;
+use Resp\Component, Resp\Tag, Resp\ThemeBuilder as tb, Resp\ThemeOptions;
 
 class ColorPalette extends Component
 {
+
+    const COLORS_DEF_PROPS = [
+        "exclude"
+    ]; 
 
     const COLORS_DEF_NAME = "colors";
 
@@ -44,7 +46,9 @@ class ColorPalette extends Component
     {
         add_action('wp_head', [$this, 'themeColorsCSS']);
         add_action('customize_register', [$this, 'customizeRegister']);
-        add_action('customize_save_after',  [$this,  'theme_colors_customize_saved']);
+        
+        //add_action('customize_save_after',  [$this,  'theme_colors_customize_saved']);
+
         add_action("resp-themebuilder-build", [$this, 'extractColors'], 10);
         add_action('wp_enqueue_scripts', [$this, 'enqueueScripts'], PHP_INT_MAX);
         add_shortcode('resp-color', [$this, 'color_shortcode']);
@@ -64,7 +68,7 @@ class ColorPalette extends Component
     function theme_colors_customize_saved()
     {
 
-        $data = ThemeBuilder::getDefinitions(self::COLORS_DEF_NAME);
+        $data = tb::getDefinitions(self::COLORS_DEF_NAME);
 
         foreach ($data as $key => $value) {
 
@@ -94,7 +98,7 @@ class ColorPalette extends Component
         }
 
         if (!empty($data)) {
-            ThemeBuilder::setDefinitions(self::COLORS_DEF_NAME, $data);
+            tb::setDefinitions(self::COLORS_DEF_NAME, $data);
         }
     }
 
@@ -204,7 +208,7 @@ class ColorPalette extends Component
      */
     function dashboardScripts()
     {
-        wp_enqueue_style("resp-color-palette", $this->getAssetsUri("color-palette.css"), ['resp-admin'], RESP_VERSION, "all");
+        wp_enqueue_style("resp-color-palette", $this->getAssetsUri("color-palette.min.css"), ['resp-admin'], RESP_VERSION, "all");
     }
 
 
@@ -224,7 +228,7 @@ class ColorPalette extends Component
         Tag::create(["class" => ["first"]])->eo();
 
         ThemeOptions::info(
-            __("Some colors are defined and your able to change them in the customizer or directly in the configuration section.", RESP_TEXT_DOMAIN)
+            __("To customize colors, go to <b>Appearance</b> &gt; <b>Themes</b> page. On this page, find the active theme (<b>RESP</b> in our case) and click on the <b>Customize</b> button next to its title, there you can change colors.", RESP_TEXT_DOMAIN)
         )->e();
 
         Tag::close();
@@ -232,16 +236,21 @@ class ColorPalette extends Component
 
         Tag::create(["class" => ["second" , "flex-center" ,  "color-palette"]])->eo();
 
-        foreach (self::$colors as $c) {
+        foreach (self::$colors as $key => $value) {
+
+            $val = $value["value"];
 
             Tag::create([
                 "class" => "color",
                 "attr" => [
                     "style" => [
-                        "background-color" => $c["value"]
+                        "background-color" => $val
                     ]
                 ]
-            ])->e();
+            ])
+            //->append(Tag::span("$key: <b>$val</b>"))
+            ->e();
+            
         }
 
         Tag::close();
@@ -289,9 +298,22 @@ class ColorPalette extends Component
     function extractColors()
     {
 
-        $data = ThemeBuilder::getDefinitions(self::COLORS_DEF_NAME);
+        $data = array_merge_recursive(
+            tb::getDefinitions(self::COLORS_DEF_NAME),
+            tb::getStatics(self::COLORS_DEF_NAME)
+        );
+
+        $exclude = __resp_array_item($data , "exclude" , []);
 
         foreach ($data as $key => $value) {
+
+            if (in_array($key, self::COLORS_DEF_PROPS)) {
+                continue;
+            }
+
+            if(in_array($key , $exclude)){
+                continue;
+            }
 
             if (!is_array($value)) {
                 $value = ["value" =>  $value];
@@ -302,12 +324,20 @@ class ColorPalette extends Component
                 "value" => __resp_array_item($value, "value", "unset")
             ];
 
+            $mod_name = "resp-color-$key";
+            self::$colors[$key]["value"] = get_theme_mod($mod_name, self::$colors[$key]["value"]);
+
             foreach (["description", "transport", "styles"] as $prop) {
                 if (isset($value[$prop])) {
                     self::$colors[$key][$prop] = $value[$prop];
                 }
             }
+
         }
+
+
+        
+
     }
 
     /** 
@@ -328,13 +358,15 @@ class ColorPalette extends Component
 
         $color = get_theme_mod($mod_name, $value);
 
+        /*
         if ($color != $value && !is_customize_preview()) {
 
-            // color is changed in the editor
+            color is changed in the editor
             set_theme_mod($mod_name, $value);
 
             return $scode ?  do_shortcode($value) : $value;
         }
+        */
 
         return $scode ? do_shortcode($color) : $color;
     }

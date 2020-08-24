@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 use Resp\Core, Resp\Tag;
@@ -43,7 +41,6 @@ if (is_array($showThumbnail)) {
 Core::thumbnailCheck($thumbnailAttr, get_the_ID());
 
 
-
 if (empty($page_namespace)) {
 
     $tax = get_queried_object();
@@ -74,6 +71,7 @@ Core::trigger("before-title", true);
 if (!have_posts() && isset($_REQUEST['s'])) {
 
     Core::tag("h2", "title",  sprintf(__("No results are available for \"%s\"", RESP_TEXT_DOMAIN), $_REQUEST['s']))->e();
+
 } else {
 
     if (isset($tax)) {

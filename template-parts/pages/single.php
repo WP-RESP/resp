@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 use Resp\Core, Resp\Tag;
@@ -70,7 +68,21 @@ while (have_posts()) {
 
     }
 
+
+
     Core::trigger("before-postcontent", true);
+
+    if(is_attachment()){
+
+        Core::tag("h2", "caption", wp_get_attachment_caption())
+            ->filter([
+                "content" => ["$page_namespace--caption-value"],
+                "class" => "$page_namespace_complete--caption-classes"
+            ], get_the_ID())
+            ->e();
+
+    }
+    
 
     the_content();
 
@@ -88,11 +100,17 @@ while (have_posts()) {
 
 if (!$is_front_page) {
 
-    if (comments_open() || get_comments_number()) {
-        comments_template();
-    }
-
     Tag::close("article");
+
+    if (comments_open() || get_comments_number()) {
+
+        $noCOmments = __resp_tp("no-comments" , false);
+
+        if(!$noCOmments){
+            comments_template();
+        }
+        
+    }
 
     Core::trigger("after-content", true);
 

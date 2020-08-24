@@ -1,15 +1,13 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp;
 
-use Resp\FileManager as fm;
+use \Resp\FileManager as fm, \Resp\ConstantLoader , \Resp\ThemeOptions;
 
 defined('RESP_TEXT_DOMAIN') or die;
 
@@ -27,9 +25,9 @@ class Core
     function __construct()
     {
 
-        do_action("resp-core--pre-initialization");
+        do_action("resp-core--pre-init");
 
-       
+
         add_action('wp_enqueue_scripts', [$this, 'enqueueScripts']);
 
         add_action('after_setup_theme', [$this, 'customThemeSetup']);
@@ -38,31 +36,38 @@ class Core
 
         add_action('template_redirect', [$this, 'underConstructionHandler'], 10);
 
-        
+
 
         fm::definePath(
-            "@templates" , 
-            fm::getRespContentDirectoryPath("templates") , 
+            "@templates",
+            fm::getRespContentDirectoryPath("templates"),
             fm::getRespDirectory("templates")
         );
 
         fm::definePath(
-            ["$" , "@assets"] , 
-            fm::getRespContentDirectoryPath("assets") , 
+            ["$", "@assets"],
+            fm::getRespContentDirectoryPath("assets"),
             fm::getRespDirectory("assets")
         );
 
 
-
-        ThemeOptions::init();
-
+        self::initOptions();
 
         self::installComponents();
 
-
-        do_action('resp-core--post-initialization');
+        do_action('resp-core--post-init');
     }
 
+
+    /**
+     * @since 0.9.0
+     */
+    private static function initOptions()
+    {
+        ConstantLoader::load(path_join(get_template_directory(), "options.json"));
+
+        ThemeOptions::init();
+    }
 
 
 
@@ -77,7 +82,6 @@ class Core
             require_once $file;
         }
     }
-
 
     /**
      * @since 0.9.0
@@ -149,19 +153,20 @@ class Core
 
         if ((!$isSuperUser) || ($isSuperUser && isset($_GET["anonymous"]))) {
 
-            if (!is_home()) {
+            if (!is_front_page()) {
                 exit(wp_redirect(home_url()));
             }
 
             if (!defined("$page_namespace--no-master")) {
                 define("$page_namespace--no-master", true);
             }
-
+            
             get_template_part("template-parts/pages/under-construction");
 
             get_footer();
 
             exit;
+
         }
     }
 
@@ -174,21 +179,31 @@ class Core
 
         global $page_namespace, $section_prefix;
 
-
         $params = array_merge_recursive(
             ThemeBuilder::getData(self::DATA_THEME_PARAMS),
             ThemeBuilder::getExternalData(self::DATA_THEME_PARAMS)
         );
 
-        $pageNS =  __resp_array_item($params, "$page_namespace--$name",  null);
+        $temp = [];
 
+        array_walk($params, function ($item, $key) use (&$temp) {
+            if(__resp_str_startsWith($key ,"*-"))
+            {
+                $slug = ThemeBuilder::getSlug();
+                $newKey = str_replace("*-" , "$slug-" , $key );
+                $temp[$newKey] = $item;
+            } else {
+                $temp[$key] = $item;
+            }
+        });
+
+        $params = $temp;
+
+        $pageNS =  __resp_array_item($params, "$page_namespace--$name",  null);
 
         $sectionNS = __resp_array_item($params, "resp-$section_prefix--$name",  null);
 
-
         $globalNS =  __resp_array_item($params, "resp--$name",  null);
-
-
 
         if (isset($globalNS)) {
             return $globalNS;
@@ -261,10 +276,13 @@ class Core
 
         load_theme_textdomain(RESP_TEXT_DOMAIN, get_template_directory() . '/languages');
 
-        if (self::isInMaintenanceMode() && is_admin() && current_user_can("update_core")) {
-            __resp_wp_notice( __("This blog is under construction.",   RESP_TEXT_DOMAIN) ,  "warning");
-        }
+        /*
+        $respMaintenanceMode = self::option("resp_maintenance_mode");
 
+        if ($respMaintenanceMode && is_admin() && current_user_can("update_core")) {
+            __resp_wp_notice(__("This blog is under construction.",   RESP_TEXT_DOMAIN),  "warning");
+        }
+        */
     }
 
     /** 
@@ -276,15 +294,6 @@ class Core
             return ((bool) constant($name)) === true;
         }
         return false;
-    }
-
-
-    /** 
-     * @since 0.9.0
-     */
-    static function isInMaintenanceMode()
-    {
-        return self::option("resp_maintenance_mode");
     }
 
 
@@ -310,12 +319,17 @@ class Core
     static function enqueueRespScripts()
     {
 
+        $respMaintenanceMode = self::option("resp_maintenance_mode");
+
         $devmod = self::option("resp_development_mode");
 
         $no_jquery = self::option("resp_no_jquery");
 
+        $resp_api = self::option("resp_api_modules");
+
         $data = [
-            "maintenanceMode" => self::isInMaintenanceMode(),
+            "home" => home_url(),
+            "maintenanceMode" => $respMaintenanceMode,
             "developmentMode" => WP_DEBUG || $devmod,
             "noJquery" => $no_jquery,
             "version" => RESP_VERSION
@@ -324,6 +338,11 @@ class Core
         if (is_user_logged_in()) {
             $data["adminAjaxUrl"] =  admin_url('admin-ajax.php');
             $data["isCustomizePreview"] = is_customize_preview();
+        }
+
+        if ($resp_api) {
+            wp_enqueue_script("custom-elements-es5-adapter", fm::getRespAssetsDirectoryUri("js/custom-elements-es5-adapter.js"), [], "2.4.3", false);
+            wp_enqueue_script("resp-api", fm::getRespAssetsDirectoryUri("js/resp-api.min.js"), ['custom-elements-es5-adapter', 'resp'], RESP_VERSION, true);
         }
 
         wp_enqueue_script("resp", fm::getRespAssetsDirectoryUri("js/resp.min.js"), [], RESP_VERSION, true);
@@ -336,22 +355,23 @@ class Core
     /**
      * @since 0.9.0
      */
-    static function isUnderConstruction()
+    static function isUnderConstructionPage()
     {
-        return self::isInMaintenanceMode() && ((!current_user_can("administrator") && !is_customize_preview()) || isset($_GET["anonymous"]));
+        $respMaintenanceMode = self::option("resp_maintenance_mode");
+        return $respMaintenanceMode && ((!current_user_can("administrator") && !is_customize_preview()) || isset($_GET["anonymous"]));
     }
 
     /**
      * @since 0.9.0
      */
-    static function chkIsolation(&$param , $sep){
+    static function chkIsolation(&$param, $sep)
+    {
 
         $slug = ThemeBuilder::getSlug();
 
         if (self::option("resp_isolation")) {
             $param = $slug . $sep . $param;
         }
-
     }
 
 
@@ -362,13 +382,28 @@ class Core
     {
         global $page_namespace;
 
-        if (is_front_page() && !self::option("resp_maintenance_mode")) {
+        $underConstruction = self::isUnderConstructionPage();
+
+        if (is_front_page()) {
+
+            $showOnFront = get_option( "show_on_front" );
+
             $page_namespace  = "index";
+
+            if($showOnFront == "page"){
+                $page_namespace  = "index-page";
+            }
+
         } else {
             $page_namespace = $namespace;
         }
 
-        self::chkIsolation($page_namespace , "-");
+        if($underConstruction){
+            $page_namespace = $namespace;
+            add_filter( "resp--master-sidebar-disabled", "__return_true");
+        }
+
+        self::chkIsolation($page_namespace, "-");
 
         get_template_part("template-parts/sections/head");
     }
@@ -403,7 +438,6 @@ class Core
         do_action($hook, $meta);
 
         echo apply_filters("$hook-value", "");
-
     }
 
 
@@ -438,15 +472,16 @@ class Core
      */
     static function text($value, $role, $echo = true)
     {
-
         global $page_namespace;
 
-        $value = apply_filters("resp--$role-value", $value);
+        $value = apply_filters("$page_namespace--$role-value", "") ?: $value;
+
+        $value = apply_filters("resp--$role-value", "") ?: $value;
 
         if ($echo) {
-            echo apply_filters("$page_namespace--$role-value", $value);
+            echo $value;
         } else {
-            return apply_filters("$page_namespace--$role-value", $value);
+            return $value;
         }
     }
 
@@ -473,9 +508,13 @@ class Core
      */
     static function index()
     {
+        
         self::initPage("index");
 
-        get_template_part("template-parts/pages/posts");
+        if(!__resp_tp("no-feed" , false))
+        {
+            get_template_part("template-parts/pages/posts");
+        }
 
         get_footer();
     }
@@ -493,7 +532,7 @@ class Core
             $sizeName = "@" . $size;
 
             array_walk($attr, function (&$item, $key) use ($sizeName, $size, $pid) {
-                if (strpos($item, $sizeName) > -1) {
+                if (is_string($item) && strpos($item, $sizeName) > -1) {
                     $url = get_the_post_thumbnail_url($pid, $size);
                     $item = str_replace($sizeName, $url, $item);
                 }
@@ -520,6 +559,8 @@ class Core
 
         $thumbnailAttr  = __resp_tp("thumbnail-attr",  []);
 
+        $thumbnailImageAttr  = __resp_tp("thumbnail-image-attr",  []);
+
 
         // override settings
         if (is_array($showThumbnail)) {
@@ -527,18 +568,22 @@ class Core
             $thumbnailSize = __resp_array_item($showThumbnail, "size", $thumbnailSize);
             $thumbnailMode  = __resp_array_item($showThumbnail, "mode", $thumbnailMode);
             $thumbnailAttr  = __resp_array_item($showThumbnail, "attr",  $thumbnailAttr);
+            $thumbnailImageAttr  = __resp_array_item($showThumbnail, "image-attr",  $thumbnailImageAttr);
         }
-
 
 
         Core::thumbnailCheck($thumbnailAttr, get_the_ID());
 
-        if ($showThumbnail && has_post_thumbnail()) {
-
-
-            $thumbnail = apply_filters("$page_namespace--thumbnail-image", get_the_post_thumbnail_url(get_the_ID(), $thumbnailSize));
-
-
+        Core::thumbnailCheck($thumbnailImageAttr, get_the_ID());
+        
+        if (($showThumbnail && has_post_thumbnail()) || is_attachment()) {
+        
+            if(is_attachment()){
+                $thumbnail = apply_filters("$page_namespace--thumbnail-image", wp_get_attachment_image_src( get_the_ID(), $thumbnailSize)[0] );
+            }else{
+                $thumbnail = apply_filters("$page_namespace--thumbnail-image", get_the_post_thumbnail_url( get_the_ID(), $thumbnailSize) );
+            }
+            
             if ($thumbnailContainer) {
                 Core::trigger("thumbnail-before-container", true);
 
@@ -557,7 +602,11 @@ class Core
 
                 Core::trigger("thumbnail-before-image", true);
 
-                $thumbnailId = get_post_thumbnail_id();
+                if(is_attachment()){
+                    $thumbnailId = get_the_ID();
+                }else{
+                    $thumbnailId = get_post_thumbnail_id();
+                }
 
                 $thumbnailAlt = get_post_meta($thumbnailId, '_wp_attachment_image_alt', true);
 
@@ -565,10 +614,10 @@ class Core
                     $thumbnailAlt = get_the_title();
                 }
 
-                $thumbnailAttr["attr"]["alt"] = $thumbnailAlt;
-                $thumbnailAttr["attr"]["src"] = $thumbnail;
+                $thumbnailImageAttr["attr"]["alt"] = $thumbnailAlt;
+                $thumbnailImageAttr["attr"]["src"] = $thumbnail;
 
-                Core::tag("img", "thumbnail-image", null, $thumbnailAttr)->e();
+                Core::tag("img", "thumbnail-image", null, $thumbnailImageAttr)->e();
 
                 Core::trigger("thumbnail-after-image", true);
             }

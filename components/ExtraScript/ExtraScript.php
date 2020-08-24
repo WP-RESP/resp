@@ -1,15 +1,13 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp\Components;
 
-use  Resp\Component, Resp\Core;
+use  \Resp\Component, \Resp\Core, \Resp\ThemeOptionWrapper as tow;
 
 class ExtraScript extends Component
 {
@@ -25,13 +23,13 @@ class ExtraScript extends Component
 
         add_action('admin_init', [$this, 'registerScriptSetting']);
 
-        add_action("resp-edit-after-content", [$this, 'scriptEditorSection']);
+        add_action("resp-settings-after-content_edit", [$this, 'scriptEditorSection']);
 
-        add_action("resp-localize-script",  [$this, "localizeCmOptions"], 10, 1);
+        add_action("resp-admin--editor",  [$this, "addJavascriptEditorOptions"], 10, 1);
 
         if (Core::option("resp_no_jquery")) {
             add_action("wp_enqueue_scripts", [$this, "deregisterJquery"], 10);
-        } else if (!Core::isUnderConstruction()) {
+        } else if (!Core::isUnderConstructionPage()) {
             add_action('wp_enqueue_scripts', [$this,  "appendScript"]);
         }
     }
@@ -55,16 +53,11 @@ class ExtraScript extends Component
     /**
      * @since 0.9.0
      */
-    function localizeCmOptions($data)
+    function addJavascriptEditorOptions($data)
     {
-        if (is_admin()) {
-            if (isset($_GET["tab"]) && $_GET["tab"] === 'edit') {
-                if (!isset($data['codeEditor'])) {
-                    $data['codeEditor'] = [];
-                }
-                $data['codeEditor']['scriptEditor'] = wp_enqueue_code_editor(['type' => 'text/javascript']);
-            }
-        }
+
+        $data['javascript'] = wp_enqueue_code_editor(['type' => 'text/javascript']);
+
         return $data;
     }
 
@@ -82,11 +75,15 @@ class ExtraScript extends Component
             $script = self::$default_scripts;
         }
 
-        \Resp\Tag::h1(__("Script", RESP_TEXT_DOMAIN))->e();
-
-        \Resp\Tag::p(__("The following script will be added into the document footer.", RESP_TEXT_DOMAIN))->e();
-
-        \Resp\Tag::textareaFor("resp_script", wp_check_invalid_utf8( $script ) )->e();
+        tow::renderForm(
+            "Script",
+            "The following code will be added to the document footer.",
+            function () use ($script) {
+                \Resp\Tag::textareaFor("resp_script", wp_check_invalid_utf8($script) , ["rows" => 15])
+                    ->addClass("large-text code")
+                    ->e();
+            }
+        );
     }
 
 

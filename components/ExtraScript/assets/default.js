@@ -1,4 +1,4 @@
-((r, d) => {
+; ((r, d) => {
     "use strict"
 
     function testScript() {

@@ -1,17 +1,15 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 use Resp\Core, Resp\Tag;
 
 global $page_namespace;
 
-echo "<!doctype html>";
+echo "<!DOCTYPE html>";
 
 Core::tag("html", "html", "", [
     "attr" => ["lang" => get_locale()]
@@ -21,14 +19,9 @@ Core::tag("html", "html", "", [
 
 <head>
 
-    <meta charset="<?php echo get_bloginfo("charset"); ?>">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-
     <?php
 
-    Core::trigger("meta" , true);
+    Core::trigger("before-head" , true);
     
     Tag::create("title")->eo();
 
@@ -38,7 +31,7 @@ Core::tag("html", "html", "", [
 
     wp_head();
 
-    Core::trigger("head" , true);
+    Core::trigger("after-head" , true);
 
     ?>
 

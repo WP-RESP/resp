@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 use Resp\Core, Resp\Tag;
@@ -15,12 +13,8 @@ Core::trigger("main-after-content", true);
 
 Tag::close("main");
 
-Tag::create([
-    "name" => "footer",
-    "class" => ["resp-footer--container", "$page_namespace--footer-container"],
+Core::tag("footer", "footer", "", [
     "attr" => ["role" => "contentinfo"]
-])->filter([
-    "class" => ["$page_namespace--footer-container-classes", "footer-classes"]
 ])->eo();
 
 Core::trigger("footer-before-content", true);

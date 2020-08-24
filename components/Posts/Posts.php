@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp\Components;
@@ -103,6 +101,10 @@ class Posts extends Component
             "paginate" => "false"
         ], $atts));
 
+        if(!is_array($atts))
+        {
+            $atts = [];
+        }
 
         if($paginate == "true"){
 
@@ -118,8 +120,6 @@ class Posts extends Component
 
         }
 
-
-
         if ($reserves == "true") {
 
             if (!isset(self::$reserved_posts[$group])) {
@@ -128,22 +128,32 @@ class Posts extends Component
 
             $data = self::$reserved_posts[$group];
 
+            $dataSize = sizeof($data);
+
             if (!empty($data) && $data[0] instanceof \WP_Post) {
 
                 $GLOBALS["respIsFirstPost"] = "true";
+
                 $GLOBALS["respPostIndex"] = "0";
+                
+                $GLOBALS["respIsLastPost"] = "false";
 
                 ob_start();
 
-                foreach ($data as $post) {
+                foreach ($data as $index => $post) {
 
                     setup_postdata($post);
+
+                    if (($index + 1) == $dataSize) {
+                        $GLOBALS["respIsLastPost"] = "true";
+                    }
 
                     echo do_shortcode($content, $ignore_html);
 
                     $GLOBALS["respIsFirstPost"] = "false";
 
                     $GLOBALS["respPostIndex"] = (string) (((int) $GLOBALS["respPostIndex"]) + 1);
+
                 }
 
                 wp_reset_postdata();
@@ -168,6 +178,12 @@ class Posts extends Component
             $atts[$taxonomy] =  $taxonomy_slug;
         }
 
+        if(!isset($atts["posts_per_page"]))
+        {
+            $postsPerPage = get_option( 'posts_per_page' );
+            $atts = array_merge($atts , [ 'posts_per_page' => $postsPerPage]);
+        }
+
         $wp_query = new \WP_Query($atts);
 
         ob_start();
@@ -175,7 +191,7 @@ class Posts extends Component
         if ($wp_query->have_posts()) {
 
             if (!empty($container)) {
-                $wrap = \Resp\Tag::create([
+                \Resp\Tag::create([
                     "name" => $container,
                     "class" => [$class]
                 ])->eo();
@@ -185,9 +201,15 @@ class Posts extends Component
     
             $GLOBALS["respPostIndex"] = "0";
 
+            $GLOBALS["respIsLastPost"] = "false";
+
             while ($wp_query->have_posts()) {
 
                 $wp_query->the_post();
+
+                if (($wp_query->current_post + 1) == ($wp_query->post_count)) {
+                    $GLOBALS["respIsLastPost"] = "true";
+                }
 
                 echo do_shortcode($content, $ignore_html);
 

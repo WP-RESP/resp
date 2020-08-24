@@ -1,15 +1,13 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp;
 
-use Resp\Tag, Resp\FileManager as fm;
+use \Resp\Tag, \Resp\FileManager as fm , \Resp\Communicator;
 
 defined('RESP_VERSION') or die;
 
@@ -67,6 +65,18 @@ class ThemeBuilder
         }
 
         self::$staticData = array_merge_recursive(self::$staticData, $data);
+
+    }
+
+
+    /**
+     * @since 0.9.0
+     */
+    static function chkForPartials(&$path){
+        if (__resp_str_startsWith($path, "@partials/")) {
+            $slug = self::getSlug();
+            $path = str_replace("@partials/" , "@templates/$slug/partials/" ,$path);
+        }
     }
 
 
@@ -82,8 +92,9 @@ class ThemeBuilder
 
             $newPath = $path;
 
-            fm::fixUndefinedExtension($newPath , "json");
+            self::chkForPartials($newPath);
 
+            fm::fixUndefinedExtension($newPath , "json");
             fm::useDefinedPaths($newPath , true);
 
             return $newPath;
@@ -215,13 +226,18 @@ class ThemeBuilder
             $default_config = get_template_directory() . "/config.json";
 
             if (file_exists($default_config)) {
-                __resp_wp_notice(sprintf(
+/*
+                Communicator::info(sprintf(
                     __("Default configuration is loaded. You can edit it <a href=\"%s\">here</a>.", RESP_TEXT_DOMAIN),
                     menu_page_url(RESP_OPTION_GROUP, false) . "&tab=edit"
                 ));
+*/
                 return file_get_contents($default_config);
+
             } else {
-                __resp_wp_notice(__("Unable to find \"config.json\".", RESP_TEXT_DOMAIN));
+
+                Communicator::critical(__("Unable to find \"config.json\".", RESP_TEXT_DOMAIN));
+
             }
         } else {
 
@@ -246,6 +262,25 @@ class ThemeBuilder
     private static function update_data()
     {
         update_option(self::DATA_OPT_NAME, json_encode(self::$data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+    }
+
+    
+    /**
+     * @since 0.9.1
+     */
+    static function replaceBlogInfo(&$text){
+
+        $blogParams =  [
+            "name", "description", "wpurl", "url", "admin_email", "charset", "version",
+            "html_type", "text_direction", "language", "stylesheet_url", "stylesheet_directory",
+            "template_url", "template_directory", "pingback_url", "atom_url", "rdf_url",
+            "rss_url", "rss2_url", "comments_atom_url", "comments_rss2_url", "siteurl", "home"
+        ];
+       
+        foreach($blogParams as $info){
+            $text = str_replace("@blog:$info" , get_bloginfo( $info ) , $text );
+        }
+        
     }
 
 

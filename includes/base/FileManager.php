@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp;
@@ -173,9 +171,11 @@ class FileManager
      */
     static function getRespDirectoryUri(...$args)
     {
-        $base = parse_url(get_template_directory_uri(), PHP_URL_PATH);
+        $pathInfo = parse_url(get_template_directory_uri());
 
-        return self::uriJoin(...array_merge([$base], $args));
+        $base = $pathInfo["scheme"] . "://" . $pathInfo["host"] . "/";
+
+        return self::uriJoin(...array_merge([$base , $pathInfo["path"]], $args));
     }
 
 

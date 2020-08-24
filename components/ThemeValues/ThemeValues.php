@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp\Components;
@@ -39,7 +37,7 @@ class ThemeValues extends Component
         "richtext" => "\Resp\RichTextEditorControl"
     ];
 
-    private $values = [];
+    private static $values = [];
 
     function __construct()
     {
@@ -47,7 +45,9 @@ class ThemeValues extends Component
 
         add_action("resp-themebuilder-build", [$this, 'extractValues'], 10);
         add_action('customize_register', [$this, 'customizeRegister']);
-        add_action('customize_save_after',  [$this,  'customizeSave']);
+
+        //add_action('customize_save_after',  [$this,  'customizeSave']);
+
         add_action('wp_enqueue_scripts', [$this, 'enqueueScripts'], PHP_INT_MAX);
         add_shortcode('resp-value', [$this, 'valueShortcode']);
         add_shortcode('resp-number', [$this, 'numberShortcode']);
@@ -64,8 +64,7 @@ class ThemeValues extends Component
      */
     function getValue($key, $default = "")
     {
-
-        return __resp_array_item($this->values, $key, $default);
+        return __resp_array_item(self::$values, $key, $default);
     }
 
 
@@ -137,20 +136,15 @@ class ThemeValues extends Component
     /**
      * @since 0.9.0
      */
-    private static function hasSelector($mod)
-    {
-        return isset($mod["id"]) || isset($mod["class"]);
-    }
-
-
-
-    /**
-     * @since 0.9.0
-     */
     function customizeRegister($wp_customize)
     {
 
-        $data = tb::getDefinitions(self::VALUES_DEF_NAME);
+        $data = array_merge_recursive( 
+            tb::getDefinitions(self::VALUES_DEF_NAME),
+            tb::getStatics(self::VALUES_DEF_NAME)
+        );
+
+        $exclude = __resp_array_item($data , "exclude" , []);
 
         $sections = __resp_array_item($data, "sections", []);
 
@@ -185,6 +179,10 @@ class ThemeValues extends Component
                 continue;
             }
 
+            if(in_array($key , $exclude)){
+                continue;
+            }
+
             if (!__resp_array_item($value, "customizable", false)) {
                 continue;
             }
@@ -199,7 +197,7 @@ class ThemeValues extends Component
             ]);
 
             $args = [
-                'label'     => $value["label"],
+                'label'     => __resp_array_item($value, "label" , $key),
                 'section'   => $section,
                 'settings'  => $key
             ];
@@ -226,8 +224,8 @@ class ThemeValues extends Component
 
             if ($has_container) {
 
-                if (self::hasSelector($value)) {
-                    $selector = isset($value["id"]) ? ("#" . $value["id"]) : ("." . (is_array($value["class"]) ? $value["class"][0] : $value["class"]));
+                if (isset($value["id"])) {
+                    $selector = "#" . $value["id"];
                 } else {
                     $selector = "#" . $key;
                 }
@@ -284,7 +282,7 @@ class ThemeValues extends Component
                     "action" => true
                 ];
 
-                $this->values[$key] = $value;
+                self::$values[$key] = $value;
             }
 
 
@@ -302,8 +300,8 @@ class ThemeValues extends Component
 
 
 
-            if (!isset($this->values[$key])) {
-                $this->values[$key] = [
+            if (!isset(self::$values[$key])) {
+                self::$values[$key] = [
                     "label" => __resp_array_item($value, "label", $key),
                     "value" => $val,
                     "type" => "text"
@@ -316,7 +314,7 @@ class ThemeValues extends Component
 
                 if (isset($value[$param])) {
 
-                    $this->values[$key][$param] = $value[$param];
+                    self::$values[$key][$param] = $value[$param];
                 }
             }
 
@@ -334,25 +332,33 @@ class ThemeValues extends Component
                     $action = [$action];
                 }
 
+                
+
                 array_walk($action, function (&$actItem, $actName) {
                     $actItem = "$actItem-value";
+
+                    if(__resp_str_startsWith($actItem ,"*-"))
+                    {
+                        $slug = tb::getSlug();
+                        $actItem = str_replace("*-" , "$slug-" , $actItem );
+                    }
                 });
 
                 foreach ($action as $a) {
-                    add_filter($a, function ($old_value) use ($key, $value, $val, $scode) {
 
-                        if (is_customize_preview()) {
-                            $val = get_theme_mod($key, $val);
-                            self::checkContainer($value, $val, $key);
-                        }
+                    add_filter($a, function ($old_value) use ($key, $value, $val, $scode) {
+                        
+                        $val = get_theme_mod($key, $val);
+                        self::checkContainer($value, $val, $key);
 
                         $val =  $scode ? do_shortcode($val) : $val;
 
                         return $old_value . $val;
+                        
                     } , (int) __resp_array_item($value , "priority" , 10));
+
                 }
             }
-
 
             if (isset($value["constant"]) && $value["constant"] === true) {
                 define($key, $scode ? do_shortcode($val) : $val);
@@ -471,14 +477,18 @@ class ThemeValues extends Component
     private static function retrieveValue(&$output, $mod_name)
     {
 
-        $mod = (self::getInstance("ThemeValues"))->getValue($mod_name, null);
-
-        if (!isset($mod)) {
+        if(!isset(self::$values[$mod_name]))
+        {
             __resp_error(sprintf(__("Value not defined: %s", RESP_TEXT_DOMAIN), $mod_name));
-            $output = null;
+            return;
         }
 
-        if (isset($mod["constant"]) && $mod["constant"] === true && !is_customize_preview()) {
+        $mod = self::$values[$mod_name];
+
+        $output = get_theme_mod($mod_name, $mod["value"]);
+
+        /*
+        if(__resp_array_item($mod , "constant" , false) === true){
             $output = constant($mod_name);
         } else {
             $output = get_theme_mod($mod_name, $mod["value"]);
@@ -486,11 +496,12 @@ class ThemeValues extends Component
 
         if ($output != $mod["value"] && !is_customize_preview()) {
 
-            // value is changed in the editor
-            set_theme_mod($mod_name, $mod["value"]);
+             value is changed in the editor
+             set_theme_mod($mod_name, $mod["value"]);
 
-            $output = $mod["value"];
+             $output = $mod["value"];
         }
+        */
 
         if (isset($mod["shortcode"]) && $mod["shortcode"] === true) {
             $output = do_shortcode($output, false);
@@ -582,7 +593,7 @@ class ThemeValues extends Component
         // get the value
         self::retrieveValue($value, $name);
 
-        if (!isset($value)) {
+        if (empty($value)) {
             return;
         }
 
@@ -590,11 +601,11 @@ class ThemeValues extends Component
         if (isset($to) && isset($as)) {
             self::convert($value, $as, $to, $content,  $ignore_html);
         } else if (self::hasConversion($name)) {
-            self::convert($value, $this->values[$name]["as"], $this->values[$name]["to"], $content,  $ignore_html);
+            self::convert($value, self::$values[$name]["as"], self::$values[$name]["to"], $content,  $ignore_html);
         }
 
         // check for container
-        self::checkContainer($this->values[$name], $value, is_customize_preview() ? $name : "");
+        self::checkContainer(self::$values[$name], $value, is_customize_preview() ? $name : "");
 
         return $value;
     }

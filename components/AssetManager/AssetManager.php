@@ -1,15 +1,13 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp\Components;
 
-use Resp\Component, Resp\FileManager as fm, Resp\ThemeBuilder as tb;
+use Resp\Tag, Resp\Component, Resp\FileManager as fm, Resp\ThemeBuilder as tb;
 
 defined("RESP_TEXT_DOMAIN") or die;
 
@@ -125,12 +123,18 @@ class AssetManager extends Component
     }
 
 
+    
+
+
 
     /**
      * @since 0.9.0
      */
     private static function checkFileURI(&$src)
     {
+
+        tb::chkForPartials($src);
+
         $param = 0;
 
         $hasDollarSign = __resp_str_startsWith($src, "$");
@@ -142,12 +146,15 @@ class AssetManager extends Component
             $param = 1;
         }
 
+
         if (__resp_str_startsWith($src, "@templates")) {
             $path = str_replace("@templates", "", $src);
             $dir =  fm::getRespContentDirectoryPath("templates");
             $base = self::getTemplatesDirUri();
             $param = 2;
         }
+
+
 
         if ($param == 0) {
             return;
@@ -178,10 +185,20 @@ class AssetManager extends Component
 
         foreach (self::$styles as $key => $value) {
 
-            $src = __resp_array_item($value, "src", "");
+            $src = "";
+
+            if(is_string($value)){
+                $src = $value;
+            } else if(is_array($value)) {
+                $src = __resp_array_item($value, "src", "");
+            }
 
             if (empty($src)) {
                 continue;
+            }
+
+            if(is_array($src)){
+                $src = $src[0];
             }
 
             if (wp_style_is($key, "enqueued")) {
@@ -214,10 +231,20 @@ class AssetManager extends Component
 
         foreach (self::$scripts as $key => $value) {
 
-            $src = __resp_array_item($value, "src", "");
+            $src = "";
+
+            if(is_string($value)){
+                $src = $value;
+            } else if(is_array($value)) {
+                $src = __resp_array_item($value, "src", "");
+            }
 
             if (empty($src)) {
                 continue;
+            }
+
+            if(is_array($src)){
+                $src = $src[0];
             }
 
             if (wp_script_is($key, "enqueued")) {
@@ -296,33 +323,47 @@ class AssetManager extends Component
     function templateShortcode($atts = [], $content = null)
     {
 
-        if (!isset($atts["name"])) {
+        if (!isset($atts["path"])) {
             return;
         }
 
-        $name = $atts["name"];
+        $path = $atts["path"];
 
-        if(!__resp_str_startsWith($name , "@templates/")){
-            $name = "@templates/$name";
+
+        tb::chkForPartials($path);
+
+
+        if(!__resp_str_startsWith($path , "@templates/")){
+            $path = "@templates/" . ltrim($path , "\/");
         }
 
-        fm::fixUndefinedExtension($name, self::VIEW_FILE_EXTENSION);
 
-        fm::useDefinedPaths($name , true);
+        fm::fixUndefinedExtension($path, self::VIEW_FILE_EXTENSION);
 
-        $info = pathinfo($name);
+        fm::useDefinedPaths($path , true);
+
+        
+
+        $info = pathinfo($path);
+
+
 
         if(!in_array($info["extension"] , ["html" , "htm" , "temp" , "tmp"] )){
             return;
         }
 
-        if(!file_exists($name)){
-            print_r($name);
+
+        if(!file_exists($path)){
+            Tag::code("File not Found \"$path\"")->e();
             return;
         }
 
-        $temp = file_get_contents($name);
+
+        $temp = file_get_contents($path);
+
 
         return do_shortcode($temp, false);
+
+
     }
 }

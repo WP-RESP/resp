@@ -1,3 +1,7 @@
+/**
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ */
 [class*="resp-notice"] {
   margin-top: 10px !important;
   padding: 10px;
@@ -114,7 +118,61 @@
   text-decoration: none;
 }
 
-.nav-tab span[class^="respicon-"] {
+.resp-notice-wrapper > h2 {
+  background: #f7f7f7;
+  display: block;
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  color: #616161;
+}
+
+.resp-notice-wrapper > p.desc {
+  margin: 12px;
+}
+
+.resp-notice-wrapper > .form-table {
+  margin: 6px;
+}
+
+.resp-notice-info {
+  position: relative;
+}
+
+.resp-nav-tab-wrapper {
+  background: #fff;
+  border-radius: 10px;
+  color: #616161;
+  padding: 0 !important;
+}
+
+.resp-nav-tab-wrapper .nav-tab {
+  background-color: transparent;
+  border: none !important;
+  color: inherit;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  border-radius: 6px;
+  font-weight: normal;
+  margin: 6px !important;
+}
+
+.resp-nav-tab-wrapper .nav-tab:hover {
+  background: #f1f1f1;
+  color: #000;
+}
+
+.resp-nav-tab-wrapper .nav-tab-active {
+  background: #f1f1f1;
+  color: #000;
+  font-weight: 600;
+}
+
+.resp-nav-tab-wrapper .nav-tab span[class^="respicon-"] {
   font-size: 16px;
   margin-right: 5px;
 }
@@ -209,4 +267,3 @@ h3.version {
     width: unset;
   }
 }
-/*# sourceMappingURL=resp-admin.css.map */

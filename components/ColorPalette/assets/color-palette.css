@@ -1,8 +1,13 @@
+/**
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ */
 .color-palette {
   margin: 20px 0;
 }
 
 .color-palette > .color {
+  position: relative;
   display: block;
   width: 50px;
   height: 50px;
@@ -15,4 +20,45 @@
   margin-left: -10px;
   -webkit-box-shadow: 2px 2px 12px -5px rgba(0, 0, 0, 0.8);
           box-shadow: 2px 2px 12px -5px rgba(0, 0, 0, 0.8);
+}
+
+.color-palette > .color > span {
+  display: none;
+  position: absolute;
+  bottom: 17px;
+  left: 50%;
+  -webkit-transform: translate(-50%, 0) rotate(-45deg);
+          transform: translate(-50%, 0) rotate(-45deg);
+  border-radius: 4px;
+  background-color: #1f1f1f;
+  background-color: rgba(0, 0, 0, 0.78);
+  padding: 10px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  width: 170px;
+  color: #ccc;
+  text-align: center;
+  z-index: 100;
+  margin: 0;
+}
+
+.color-palette > .color > span::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid rgba(0, 0, 0, 0.8);
+  display: block;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  -webkit-transform: translate(-50%, 0);
+          transform: translate(-50%, 0);
+}
+
+.color-palette > .color:hover > span {
+  display: block;
 }

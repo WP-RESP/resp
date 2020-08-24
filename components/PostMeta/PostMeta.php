@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp\Components;
@@ -13,6 +11,10 @@ use  Resp\Component, Resp\FileManager, Resp\Tag, Resp\ThemeBuilder;
 
 class PostMeta extends Component
 {
+
+    private static $next_post = null;
+
+    private static $prev_post = null;
 
     private static $post_data =  [
         "ID", "post_author", "post_name", "post_type", "post_title", "post_date", "post_date_gmt",
@@ -109,6 +111,12 @@ class PostMeta extends Component
 
         }
 
+        if ($name === "taxonomy") {
+            if(isset($atts["terms"])){
+                return self::getTerms($id, $atts["terms"] , $atts);
+            }
+        }
+
         if ($name === "excerpt") {
             return get_the_excerpt($id);
         }
@@ -122,12 +130,11 @@ class PostMeta extends Component
         }
 
         if (in_array($name, ["thumbnail_url",  "thumbnail"])) {
-
             return $this->getImage($atts);
         }
 
         if (in_array($name, ["cat",  "category", "categories"])) {
-            return $this->get_categories($atts);
+            return $this->getCategories($atts);
         }
 
         if (in_array($name, ["next",  "next_post"])) {
@@ -161,9 +168,11 @@ class PostMeta extends Component
             "taxonomy" => "category"
         ], $atts));
 
-        $post = get_next_post($in_same_term, $excluded_terms, $taxonomy);
+        if(empty(self::$next_post)){
+            self::$next_post = get_next_post($in_same_term, $excluded_terms, $taxonomy);
+        }
 
-        if (!isset($post->ID) || $post->ID == $id) {
+        if (!isset(self::$next_post->ID) || self::$next_post->ID == $id) {
             $GLOBALS["respNextPostNotFound"] = "true";
             return "";
         }
@@ -172,7 +181,10 @@ class PostMeta extends Component
             return "";
         }
 
-        return $this->getMeta($atts, $param, $post->ID, $do_shortcode, $ignore_html);
+        $atts["id"] = self::$next_post->ID;
+        $atts["name"] = $param;
+
+        return $this->getMeta($atts, $param, self::$next_post->ID, $do_shortcode, $ignore_html);
     }
 
 
@@ -189,9 +201,12 @@ class PostMeta extends Component
             "taxonomy" => "category"
         ], $atts));
 
-        $post = get_previous_post($in_same_term, $excluded_terms, $taxonomy);
 
-        if (!isset($post->ID) || $post->ID == $id) {
+        if(empty(self::$prev_post)){
+            self::$prev_post = get_previous_post($in_same_term, $excluded_terms, $taxonomy);
+        }
+
+        if (!isset(self::$prev_post->ID) || self::$prev_post->ID == $id) {
             $GLOBALS["respPrevPostNotFound"] = "true";
             return "";
         }
@@ -200,7 +215,10 @@ class PostMeta extends Component
             return "";
         }
 
-        return $this->getMeta($atts, $param, $post->ID, $do_shortcode, $ignore_html);
+        $atts["id"] = self::$prev_post->ID;
+        $atts["name"] = $param;
+
+        return $this->getMeta($atts, $param, self::$prev_post->ID, $do_shortcode, $ignore_html);
     }
 
 
@@ -232,7 +250,81 @@ class PostMeta extends Component
     /**
      * @since 0.9.0
      */
-    private function get_categories($atts)
+    private static function getTerms($id , $term , $atts){
+
+        extract(shortcode_atts([
+            "container" => "ul",
+            "class" => "",
+            "item" => "li",
+            "itemClass" => "",
+            "linkedItem" => true,
+            "include_children" => true
+        ], $atts));
+
+        $terms = wp_get_post_terms( $id, $term);
+
+
+        if (!$terms) {
+            return;
+        }
+
+        ob_start();
+
+        if (!empty($container)) {
+            \Resp\Tag::create([
+                "name" => $container,
+                "class" => $class
+            ])->eo();
+        }
+
+        foreach ($terms as $t) {
+
+            $item_body = \Resp\Tag::create([
+                "name" => $item,
+                "class" => ["term-$t->slug"]
+            ]);
+
+            $href = esc_url(get_term_link($t->term_id));
+
+            $rel = "category tag";
+
+            if ($item == "a") {
+                $item_body->set([
+                    "content" => $t->name,
+                    "attr" => [
+                        "href" => $href,
+                        "rel" => $rel
+                    ]
+                ]);
+            } else if ($linkedItem) {
+                $item_body->append(\Resp\Tag::create([
+                    "name" => "a",
+                    "content" => $t->name,
+                    "attr" => [
+                        "href" => $href,
+                        "rel" => $rel
+                    ]
+                ]));
+            } else {
+                $item_body->set(["content" => $t->name]);
+            }
+
+            $item_body->e();
+        }
+
+        if (!empty($container)) {
+            \Resp\Tag::close($container);
+        }
+
+        return ob_get_clean();
+
+    }
+
+
+    /**
+     * @since 0.9.0
+     */
+    private function getCategories($atts)
     {
         extract(shortcode_atts([
             "id"   => null,

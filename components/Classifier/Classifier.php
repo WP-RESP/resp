@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Apache License, Version 2.0
- * Copyright (C) 2019 Arman Afzal <arman.afzal@divanhub.com>
- * 
- * @since 0.9.0
+ * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
+ * Copyright (C) 2019 Arman Afzal <rmanaf.com>
  */
 
 namespace Resp\Components;
@@ -70,7 +68,8 @@ class Classifier extends Component
         foreach (array_merge_recursive($data, $staticData) as $key => $value) {
 
             if (
-                !__resp_str_startsWith($key, $themeSlug) &&
+                !__resp_str_startsWith($key, "*-") &&
+                !__resp_str_startsWith($key, "$themeSlug-") &&
                 !in_array($key, self::SPECIAL_TAGS) &&
                 !__resp_hasItemWithPrefix(self::SPECIAL_PREFIX, $key)
             ) {
@@ -82,7 +81,13 @@ class Classifier extends Component
                 continue;
             }
 
-            add_filter("$key-classes", function ($classes) use ($value) {
+            $filter = "$key-classes";
+
+            if(__resp_str_startsWith($filter , "*-")){
+                $filter = str_replace("*-" , "$themeSlug-" , $filter );
+            }
+
+            add_filter($filter, function ($classes) use ($value) {
                 $val = is_array($value) ? $value : [$value];
 
                 if (is_array($classes)) {
@@ -159,11 +164,9 @@ class Classifier extends Component
 
         $atts = $data["attr"];
 
-
         if (!current_user_can("update_core")) {
             return $data;
         }
-
 
         if (!Core::option("resp_development_mode")) {
             return $data;
@@ -174,11 +177,11 @@ class Classifier extends Component
         $gbClass = $role;
 
         Core::chkIsolation($smClass , "-");
+
         Core::chkIsolation($gbClass , "--");
 
 
         $class_filters =  __resp_array_merge(["$gbClass-classes", "$page_namespace--$role-classes"], (empty($section_prefix) ? [] : ["$smClass-classes"]));
-
 
         if (in_array($role, self::SPECIAL_TAGS)) {
             $class_filters[] = "$role-classes";
