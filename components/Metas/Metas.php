@@ -18,14 +18,17 @@ class Metas extends Component
 
     function __construct()
     {
-        add_action("resp-themebuilder-build", [$this, 'extractMetas'], 10);
-        add_action( "resp--before-head",  [$this, "printMetas"] , 10);
+        
+        add_action("resp-themebuilder-build", [$this, 'init'], 10);
+       
     }
 
     /**
      * @since 0.9.1
      */
-    function extractMetas(){
+    function init(){
+
+        $slug = ThemeBuilder::getSlug();
 
         $data = ThemeBuilder::getData(self::METAS_DEF_NAME);
 
@@ -40,6 +43,8 @@ class Metas extends Component
         });
 
         self::$metas = $data;
+
+        add_action("$slug--before-head",  [$this, "printMetas"] , 10);
 
     }
 
