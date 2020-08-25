@@ -7,7 +7,7 @@
 
 namespace Resp\Components;
 
-use Resp\Component, Resp\ThemeBuilder, Resp\Tag;
+use Resp\Component, Resp\ThemeBuilder as tb, Resp\Tag;
 
 class Metas extends Component
 {
@@ -18,42 +18,59 @@ class Metas extends Component
 
     function __construct()
     {
-        
-        add_action("resp-themebuilder-build", [$this, 'init'], 10);
-       
+        add_action("resp-themebuilder-build", [$this, 'onDataLoaded'], 10);  
     }
 
     /**
      * @since 0.9.1
      */
-    function init(){
+    function onDataLoaded(){
 
-        $slug = ThemeBuilder::getSlug();
-
-        $data = ThemeBuilder::getData(self::METAS_DEF_NAME);
-
-        array_walk($data , function(&$item , $key) use ($data) { 
-        
-            $value = $data[$key];
-
-            ThemeBuilder::replaceBlogInfo($value);
-
-            $item = $value;
-            
-        });
-
-        self::$metas = $data;
+        $slug = tb::getSlug();
 
         add_action("$slug--before-head",  [$this, "printMetas"] , 10);
-
     }
 
     /**
      * @since 0.9.1
      */
     function printMetas(){
-       
-        foreach(self::$metas as $meta){
+
+        $data = tb::getData(self::METAS_DEF_NAME);
+
+        if(empty($data)){
+            return;
+        }
+
+        $all = $data["@all"] ?? [];
+
+        if(is_front_page()){
+            $all = array_merge($all , $data["@home"] ?? []);
+        }
+
+        if(is_single()){
+            $all = array_merge($all , $data["@single"] ?? []);
+        }
+
+        if(is_attachment()){
+            $all = array_merge($all , $data["@attachment"] ?? []);
+        }
+
+        if(is_page()){
+            $all = array_merge($all , $data["@page"] ?? []);
+        }
+
+        array_walk($all , function(&$item , $key) { 
+    
+            tb::replaceBlogInfo($item);
+
+            tb::replacePostParams($item);
+            
+        });
+
+        self::$metas = $all;
+
+        foreach(self::$metas as $key => $meta){
 
             $name = $meta["wrap"] ?? "meta";
 

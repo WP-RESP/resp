@@ -283,6 +283,30 @@ class ThemeBuilder
         
     }
 
+    /**
+     * @since 0.9.1
+     */
+    static function replacePostParams(&$text){
+
+        global $post;
+
+        if(!isset($post)){
+            return;
+        }
+
+        $postParams =  [
+            "ID", "post_author", "post_name", "post_type", "post_title", "post_date", "post_date_gmt",
+            "post_content", "post_excerpt", "post_status", "comment_status", "ping_status",
+            "post_password", "post_parent", "post_parent", "post_modified", "post_modified_gmt",
+            "comment_count", "menu_order", "guid"
+        ];
+
+        foreach($postParams as $param){
+            $text = str_replace("@post:$param" , $post->$param , $text );
+        }
+
+    }
+
 
     /**
      * @since 0.9.0

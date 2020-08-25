@@ -1,21 +1,27 @@
 {
     "name": "RESP",
-    "version" : "0.9.0",
-    "metas" : [
-        { 
-            "wrap" : "base",
-            "href" : "@blog:home"
-        },
-        { 
-			"charset" : "@blog:charset"
-		},
-        {
-            "http-equiv" : "X-UA-Compatible",
-            "content" : "IE=edge"
-        },
-        {
-            "name" : "viewport",
-            "content" : "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-        }
-    ]
+    "version": "0.9.1",
+    "metas": {
+        "@all": [
+            {
+                "wrap": "base",
+                "href": "@blog:home"
+            },
+            {
+                "charset": "@blog:charset"
+            },
+            {
+                "http-equiv": "X-UA-Compatible",
+                "content": "IE=edge"
+            },
+            {
+                "name": "viewport",
+                "content": "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+            }
+        ],
+        "@home" : [],
+        "@single" : [],
+        "@attachment" : [],
+        "@page" : []
+    }
 }
