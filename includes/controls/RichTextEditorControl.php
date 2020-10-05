@@ -2,24 +2,26 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp;
+
+defined('RESP_VERSION') or die;
 
 class RichTextEditorControl extends \WP_Customize_Control
 {
 
     public $type = 'richtext';
 
-    public function enqueue()
+    function enqueue()
     {
         $js = FileManager::getRespAssetsDirectoryUri("js/richtext-control.js");
         wp_enqueue_script('resp-richtext-control-js', $js, array('jquery'), RESP_VERSION, true);
         wp_enqueue_editor();
     }
 
-    public function to_json()
+    function to_json()
     {
         parent::to_json();
         $this->json['tinymce_toolbar1'] = isset($this->input_attrs['toolbar1']) ? esc_attr($this->input_attrs['toolbar1']) : 'bold italic bullist numlist alignleft aligncenter alignright link';
@@ -27,7 +29,7 @@ class RichTextEditorControl extends \WP_Customize_Control
         $this->json['tinymce_mediabuttons'] = isset($this->input_attrs['mediaButtons']) && ($this->input_attrs['mediaButtons'] === true) ? true : false;
     }
 
-    public function render_content()
+    function render_content()
     {
         $wrap = Tag::create([
             "name" => "div",

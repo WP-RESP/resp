@@ -2,7 +2,7 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 
@@ -13,12 +13,13 @@ defined('ABSPATH') or die;
  */
 function __resp_init()
 {
-    
-    define("RESP_TEXT_DOMAIN", "resp");
+
+    define("RESP_MAIN_SERVER", "https://wp-resp.com");
     define("RESP_OPTION_GROUP", "resp");
-    define("RESP_VERSION", "0.9.0");
+    define("RESP_VERSION", "0.9.2");
 
     foreach ([
+        "base/DOMHandlers" ,
         "base/FileManager" , 
         "base/Tag", 
         "base/Component",  
@@ -191,6 +192,24 @@ function __resp_tp($name , $default)
 function __resp_wp_notice($message, $type = "info", $dismissible = true)
 {
     \Resp\Communicator::notice($message , $type , $dismissible);
+}
+
+/**
+ * @since 0.9.2
+ */
+function __resp_register_parser($tag , $shortcode , $callback ){
+
+    add_filter( "resp-core--parsers" , function($parsers) use ($tag , $shortcode , $callback ){
+
+        $parsers[] = [
+            "tag" => $tag,
+            "shortcode" => $shortcode,
+            "callback" => $callback
+        ];
+
+        return $parsers;
+
+    } );
 }
 
 __resp_init();

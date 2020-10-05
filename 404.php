@@ -2,7 +2,7 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 use Resp\Tag, Resp\Core;
@@ -21,19 +21,19 @@ Core::tag("div", "content", "")->eo();
 
 Core::trigger("before-code");
 
-Core::tag("h1", "code", apply_filters("$page_namespace--code-value" , "") ?: __("404" , RESP_TEXT_DOMAIN))->e();
+Core::tag("h1", "code", apply_filters("$page_namespace--code-value" , "") ?: esc_html__("404" , "resp"))->e();
 
 Core::trigger("before-title");
 
-Core::tag("h3", "title", apply_filters("$page_namespace--title-value" , "") ?: __("Page Not Found" , RESP_TEXT_DOMAIN))->e();
+Core::tag("h3", "title", apply_filters("$page_namespace--title-value" , "") ?: esc_html__("Page Not Found" , "resp"))->e();
 
 Core::trigger("before-message");
 
-Core::tag("p", "message", apply_filters("$page_namespace--message-value", "") ?: __("The page you are looking for might have been removed, had its name changed, or is temporarily unavailable." , RESP_TEXT_DOMAIN))->e();
+Core::tag("p", "message", apply_filters("$page_namespace--message-value", "") ?: esc_html__("The page you are looking for might have been removed, had its name changed, or is temporarily unavailable." , "resp"))->e();
 
 Core::trigger("before-back-to-homepage");
 
-Core::tag("a", "back-to-homepage", apply_filters("$page_namespace--back-to-homepage-value" , "") ?: __('Back To Homepage' , RESP_TEXT_DOMAIN))->set(["attr" => [
+Core::tag("a", "back-to-homepage", apply_filters("$page_namespace--back-to-homepage-value" , "") ?: esc_html__('Back To Homepage' , "resp"))->set(["attr" => [
     "href" => get_home_url()
 ]])->e();
 

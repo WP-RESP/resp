@@ -1,12 +1,23 @@
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
-.color-palette {
-  margin: 20px 0;
+.resp-color-palette {
+  background-image: url(./card-bg.jpg);
+  background-repeat: no-repeat;
 }
 
-.color-palette > .color {
+.resp-color-palette .desc-col {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+}
+
+.resp-color-palette .color-list {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.resp-color-palette .color-list .color {
   position: relative;
   display: block;
   width: 50px;
@@ -22,7 +33,7 @@
           box-shadow: 2px 2px 12px -5px rgba(0, 0, 0, 0.8);
 }
 
-.color-palette > .color > span {
+.resp-color-palette .color-list .color > span {
   display: none;
   position: absolute;
   bottom: 17px;
@@ -42,7 +53,7 @@
   margin: 0;
 }
 
-.color-palette > .color > span::before {
+.resp-color-palette .color-list .color > span::before {
   content: '';
   width: 0;
   height: 0;
@@ -59,6 +70,6 @@
           transform: translate(-50%, 0);
 }
 
-.color-palette > .color:hover > span {
+.resp-color-palette .color-list .color:hover > span {
   display: block;
 }

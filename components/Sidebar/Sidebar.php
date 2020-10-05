@@ -2,14 +2,14 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp\Components;
 
-use  Resp\Component, Resp\Core, Resp\Tag, Resp\ThemeBuilder;
+use Resp\Component, Resp\Core, Resp\Tag, Resp\ThemeBuilder;
 
-defined("RESP_TEXT_DOMAIN") or die;
+defined('RESP_VERSION') or die;
 
 class Sidebar extends Component
 {
@@ -41,8 +41,8 @@ class Sidebar extends Component
 
         register_sidebar([
             'id' => 'master-header',
-            'name' => __('Master header', RESP_TEXT_DOMAIN),
-            'description' => __('This section appears on the top of all pages.', RESP_TEXT_DOMAIN),
+            'name' => esc_html__('Header', "resp"),
+            'description' => esc_html__('Widgets will appear on all pages of your blog site.', "resp"),
             'before_widget' => '',
             'after_widget' => '',
             'before_title' => '<h3 class="resp-sidebar-title-master-header">',
@@ -52,8 +52,8 @@ class Sidebar extends Component
 
         register_sidebar(array(
             'id' => 'master-footer',
-            'name' => __('Master footer', RESP_TEXT_DOMAIN),
-            'description' => __('This section appears on the bottom of all pages.', RESP_TEXT_DOMAIN),
+            'name' => esc_html__('Footer', "resp"),
+            'description' => esc_html__('Widgets will appear on all pages of your blog site.', "resp"),
             'before_widget' => '',
             'after_widget' => '',
             'before_title' => '<h3 class="resp-sidebar-title-master-footer">',

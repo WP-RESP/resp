@@ -1,8 +1,8 @@
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
-[class*="resp-notice"] {
+[class*="resp-card"] {
   margin-top: 10px !important;
   padding: 10px;
   border-radius: 14px;
@@ -13,97 +13,122 @@
   overflow: hidden;
 }
 
-[class*="resp-notice"].two-column {
-  display: -ms-grid;
-  display: grid;
-  -ms-grid-columns: 1fr 1fr;
-      grid-template-columns: 1fr 1fr;
-  -ms-grid-rows: 1fr;
-      grid-template-rows: 1fr;
-  grid-column-gap: 0px;
-  grid-row-gap: 0px;
+[class*="resp-card"] .card-header {
+  background: #f7f7f7;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  color: #616161;
+  height: 50px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
 }
 
-[class*="resp-notice"].two-column .flex-center {
+[class*="resp-card"] .card-header h1, [class*="resp-card"] .card-header h2, [class*="resp-card"] .card-header h3, [class*="resp-card"] .card-header h4, [class*="resp-card"] .card-header h5, [class*="resp-card"] .card-header h6 {
+  margin: 0;
+}
+
+[class*="resp-card"] .card-header button {
+  display: inline-block;
+  background: #4d657d;
+  border: none;
+  outline: none;
+  padding: 5px 10px;
+  color: white;
+  font-size: 14px;
+  border-radius: 4px;
+  margin: 4px !important;
+}
+
+[class*="resp-card"] .card-description {
+  margin: 12px;
+}
+
+.resp-spinner {
+  display: none;
+  -webkit-box-sizing: content-box;
+          box-sizing: content-box;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 0, 0, 0.14);
+  border-radius: 50%;
+  border-top-color: #dd1a25;
+  -webkit-animation: resp-spinner-anim 1s ease-in-out infinite;
+          animation: resp-spinner-anim 1s ease-in-out infinite;
+  margin-left: 6px;
+  margin-right: 6px;
+}
+
+.resp-spinner.large {
+  width: 35px;
+  height: 35px;
+  border: 4px solid rgba(255, 0, 0, 0.14);
+  border-top-color: #dd1a25;
+}
+
+.resp-spinner-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin: 0;
+}
+
+.resp-spinner-container.busy .resp-spinner {
+  display: inline-block;
+}
+
+.horizontal-flex-space {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+}
+
+@-webkit-keyframes resp-spinner-anim {
+  to {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+
+@keyframes resp-spinner-anim {
+  to {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+
+.flex-center {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
+}
+
+#server_info_wrap.busy {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-}
-
-[class*="resp-notice"].two-column .first {
-  -ms-grid-row: 1;
-  -ms-grid-row-span: 1;
-  -ms-grid-column: 1;
-  -ms-grid-column-span: 1;
-  grid-area: 1 / 1 / 2 / 2;
-}
-
-[class*="resp-notice"].two-column .second {
-  -ms-grid-row: 1;
-  -ms-grid-row-span: 1;
-  -ms-grid-column: 2;
-  -ms-grid-column-span: 1;
-  grid-area: 1 / 2 / 2 / 3;
-}
-
-[class*="resp-notice"] .resp-spinner {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255, 0, 0, 0.14);
-  border-radius: 50%;
-  border-top-color: #dd1a25;
-  -webkit-animation: spin 1s ease-in-out infinite;
-          animation: spin 1s ease-in-out infinite;
-  margin-left: 6px;
-  margin-right: 6px;
-}
-
-[class*="resp-notice"] .resp-spinner.large {
-  width: 35px;
-  height: 35px;
-  border: 4px solid rgba(255, 0, 0, 0.14);
-}
-
-@media screen and (max-width: 782px) {
-  [class*="resp-notice"].two-column {
-    -ms-grid-columns: 1fr;
-        grid-template-columns: 1fr;
-    -ms-grid-rows: 1fr 1fr;
-        grid-template-rows: 1fr 1fr;
-  }
-  [class*="resp-notice"].two-column .first {
-    -ms-grid-row: 1;
-    -ms-grid-row-span: 1;
-    -ms-grid-column: 1;
-    -ms-grid-column-span: 1;
-    grid-area: 1 / 1 / 2 / 2;
-  }
-  [class*="resp-notice"].two-column .second {
-    -ms-grid-row: 2;
-    -ms-grid-row-span: 1;
-    -ms-grid-column: 1;
-    -ms-grid-column-span: 1;
-    grid-area: 2 / 1 / 3 / 2;
-  }
-}
-
-@-webkit-keyframes spin {
-  to {
-    -webkit-transform: rotate(360deg);
-  }
-}
-
-@keyframes spin {
-  to {
-    -webkit-transform: rotate(360deg);
-  }
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  height: 120px;
 }
 
 .gdcp-version-box {
@@ -118,24 +143,20 @@
   text-decoration: none;
 }
 
-.resp-notice-wrapper > h2 {
-  background: #f7f7f7;
+.resp-card .input-label {
+  margin-bottom: 7px;
   display: block;
-  margin: 0;
-  padding: 12px;
-  border-radius: 8px;
-  color: #616161;
 }
 
-.resp-notice-wrapper > p.desc {
-  margin: 12px;
-}
-
-.resp-notice-wrapper > .form-table {
+.resp-card > .form-table {
   margin: 6px;
 }
 
-.resp-notice-info {
+.resp-card.product-info {
+  position: relative;
+}
+
+.resp-card--relative {
   position: relative;
 }
 
@@ -172,9 +193,10 @@
   font-weight: 600;
 }
 
-.resp-nav-tab-wrapper .nav-tab span[class^="respicon-"] {
+.resp-nav-tab-wrapper .nav-tab span[class^="ri-"] {
   font-size: 16px;
-  margin-right: 5px;
+  margin-right: 3px;
+  margin-left: 3px;
 }
 
 .gdcp-tabs {
@@ -182,7 +204,7 @@
 }
 
 #toplevel_page_resp .wp-menu-image:before {
-  font-family: 'resp' !important;
+  font-family: 'resp-icons' !important;
   content: '\e900';
 }
 
@@ -245,12 +267,22 @@ h3.version {
   line-height: 26px;
 }
 
+h3.version .new {
+  font-size: 12px;
+  background: #b12485;
+  color: white;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 4px;
+  font-weight: normal;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
 .logo > img {
-  width: 190px;
+  width: 100%;
+  max-width: 190px;
   margin: auto;
-  display: block;
-  margin-top: 30px;
-  margin-bottom: 30px;
 }
 
 .second .get-temp-btn {
@@ -260,10 +292,4 @@ h3.version {
 
 .second .import-temp-btn {
   margin-bottom: 10px !important;
-}
-
-@media screen and (max-width: 782px) {
-  .logo > img {
-    width: unset;
-  }
 }

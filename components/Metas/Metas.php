@@ -2,12 +2,14 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp\Components;
 
 use Resp\Component, Resp\ThemeBuilder as tb, Resp\Tag;
+
+defined('RESP_VERSION') or die;
 
 class Metas extends Component
 {
@@ -36,7 +38,10 @@ class Metas extends Component
      */
     function printMetas(){
 
-        $data = tb::getData(self::METAS_DEF_NAME);
+        $data = array_merge_recursive( 
+            tb::getData(self::METAS_DEF_NAME),
+            tb::getStatics(self::METAS_DEF_NAME)
+        );
 
         if(empty($data)){
             return;
@@ -60,12 +65,20 @@ class Metas extends Component
             $all = array_merge($all , $data["@page"] ?? []);
         }
 
-        array_walk($all , function(&$item , $key) { 
-    
-            tb::replaceBlogInfo($item);
+        array_walk($all , function(&$param , $index) { 
 
-            tb::replacePostParams($item);
-            
+            if(!is_array($param)){
+                return;
+            }
+
+            array_walk($param , function(&$item , $key) { 
+
+                tb::replaceBlogInfo($item);
+                
+                tb::replacePostParams($item);
+                
+            });
+
         });
 
         self::$metas = $all;

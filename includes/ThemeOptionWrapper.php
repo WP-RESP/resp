@@ -2,12 +2,14 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp;
 
 use \Resp\Tag;
+
+defined('RESP_VERSION') or die;
 
 class ThemeOptionWrapper
 {
@@ -29,14 +31,14 @@ class ThemeOptionWrapper
             add_action("{$apx}_{$name}", $callback);
         }
 
-        Tag::create(["class" => "resp-notice-wrapper"])
-            ->eo();
+        Tag::create(["class" => "resp-card"])->eo();
 
-        Tag::h2(__($title , RESP_TEXT_DOMAIN))
-            ->e();
-
-        Tag::p(__($description , RESP_TEXT_DOMAIN))
-            ->set(["class" => "desc"])
+        Tag::create(["class" => "card-header"])->append(apply_filters( "{$apx}_{$name}_header-items" ,[
+            Tag::h2(esc_html__($title , "resp"))
+        ]))->e();
+            
+        Tag::p(esc_html__($description , "resp"))
+            ->set(["class" => "card-description"])
             ->e();
 
         do_action("{$apx}_{$name}");

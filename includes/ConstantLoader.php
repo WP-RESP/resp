@@ -2,12 +2,14 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp;
 
 use \Resp\Communicator;
+
+defined('RESP_VERSION') or die;
 
 class ConstantLoader {
 
@@ -49,7 +51,9 @@ class ConstantLoader {
     {
 
         if (!file_exists($path)) {
-            Communicator::critical(sprintf(__("File not found: \"%s\"" ,RESP_TEXT_DOMAIN) , $path));
+            Communicator::critical(sprintf(
+                 /* translators: %s is replaced with "string" */
+                esc_html__("File not found: \"%s\"" ,"resp") , $path));
             return;
         }
 

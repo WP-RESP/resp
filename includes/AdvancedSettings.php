@@ -2,12 +2,14 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp;
 
 use \Resp\Tag, \Resp\ConstantLoader;
+
+defined('RESP_VERSION') or die;
 
 class AdvancedSettings
 {
@@ -40,7 +42,7 @@ class AdvancedSettings
 
         add_settings_section(
             $group,
-            __("Advanced Settings"),
+            esc_html__("Advanced Settings" , "resp"),
             "$class::settingSectionCallback",
             $group
         );
@@ -50,7 +52,7 @@ class AdvancedSettings
             register_setting($group, $key, ['default' => $value["default"]]);
             add_settings_field(
                 $key,
-                __($value["label"], RESP_TEXT_DOMAIN),
+                esc_html__($value["label"], "resp"),
                 $callback,
                 $group,
                 $group,
@@ -81,11 +83,11 @@ class AdvancedSettings
         $value = get_option($args['label_for'], $args['default']);
 
         if (is_bool($args['default'])) {
-            Tag::checkboxFor($args['label_for'], __($args["description"], RESP_TEXT_DOMAIN), $value)->e();
+            Tag::checkboxFor($args['label_for'], esc_html__($args["description"], "resp"), $value)->e();
         }
 
         if (is_string($args['default'])) {
-            Tag::labelFor($args['label_for'],  __($args["description"], RESP_TEXT_DOMAIN), ["append_content" => true])->eo();
+            Tag::labelFor($args['label_for'],  esc_html__($args["description"], "resp"), ["append_content" => true])->eo();
             Tag::textFor($args['label_for'], $value, ["class" => "regular-text"])->e();
             Tag::close("label");
         }

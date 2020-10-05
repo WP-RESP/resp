@@ -2,12 +2,14 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp;
 
 use Resp\Core, Resp\Tag;
+
+defined('RESP_VERSION') or die;
 
 class RespWalkerComment extends \Walker_Comment
 {
@@ -84,11 +86,11 @@ class RespWalkerComment extends \Walker_Comment
 
 
         $fields = [
-            'author' => self::generateField("author", __('Name' , RESP_TEXT_DOMAIN), "text", $req, $commenter, [
+            'author' => self::generateField("author", esc_html__('Name' , "resp"), "text", $req, $commenter, [
                 "maxlength" => 245,
                 "size" => 30
             ])->toString(),
-            'email'  => self::generateField("email", __('Email' , RESP_TEXT_DOMAIN), "email", $req, $commenter, [
+            'email'  => self::generateField("email", esc_html__('Email' , "resp"), "email", $req, $commenter, [
                 "maxlength" => 100,
                 "size" => 30,
                 "aria-describedby" => "email-notes"
@@ -98,7 +100,7 @@ class RespWalkerComment extends \Walker_Comment
         $url = __resp_tp("comments-form-url" , true);
 
         if($url) {
-            $fields['url'] = self::generateField("url", __('Website' , RESP_TEXT_DOMAIN), "url", false, $commenter, [
+            $fields['url'] = self::generateField("url", esc_html__('Website' , "resp"), "url", false, $commenter, [
                 "maxlength" => 200,
                 "size" => 30
             ])->toString();
@@ -112,7 +114,7 @@ class RespWalkerComment extends \Walker_Comment
 
             $consent = empty($commenter['comment_author_email']) ? false : true;
 
-            $cookieLabel = Core::tag("label", "comments-form-cookies-consent-label",  __('Save my name, email, and website in this browser for the next time I comment.' , RESP_TEXT_DOMAIN), [
+            $cookieLabel = Core::tag("label", "comments-form-cookies-consent-label",  esc_html__('Save my name, email, and website in this browser for the next time I comment.' , "resp"), [
                 "attr" => [
                     "for" => $id
                 ]
@@ -152,7 +154,7 @@ class RespWalkerComment extends \Walker_Comment
 
         $required_text = sprintf(
             /* translators: %s: Asterisk symbol (*). */
-            ' ' . __('Required fields are marked %s'),
+            ' ' . esc_html__('Required fields are marked %s'),
             '<span class="required">*</span>'
         );
 
@@ -168,30 +170,41 @@ class RespWalkerComment extends \Walker_Comment
             'must_log_in'          => sprintf(
                 '<p class="must-log-in">%s</p>',
                 sprintf(
-                    /* translators: %s: Login URL. */
-                    __('You must be <a href="%s">logged in</a> to post a comment.'),
-                    /** This filter is documented in wp-includes/link-template.php */
-                    wp_login_url(apply_filters('the_permalink', get_permalink($post_id), $post_id))
+                    /* translators: %1$s is replaced with "string" */
+                    esc_html__('You must be %1$s to post a comment.', 'resp'),
+                    sprintf(
+                        '<a target="_blank" href="%s">%s</a>',
+                       /** This filter is documented in wp-includes/link-template.php */
+                        wp_login_url(apply_filters('the_permalink', get_permalink($post_id), $post_id)),
+                        esc_html__( 'logged in', 'resp' )
+                    )
                 )
             ),
             'logged_in_as'         => sprintf(
                 '<p class="logged-in-as">%s</p>',
                 sprintf(
-                    /* translators: 1: Edit user link, 2: Accessibility text, 3: User name, 4: Logout URL. */
-                    __('<a href="%1$s" aria-label="%2$s">Logged in as %3$s</a>. <a href="%4$s">Log out?</a>'),
-                    get_edit_user_link(),
-                    /* translators: %s: User name. */
-                    esc_attr(sprintf(__('Logged in as %s. Edit your profile.'), $user_identity)),
-                    $user_identity,
-                    /** This filter is documented in wp-includes/link-template.php */
-                    wp_logout_url(apply_filters('the_permalink', get_permalink($post_id), $post_id))
+                    '%1$s. %2$s',
+                    sprintf(
+                        '<a href="%1$s" aria-label="%2$s">%3$s %4$s</a>',
+                        get_edit_user_link(),
+                        esc_attr(sprintf(
+                             /* translators: %s is replaced with "string" */
+                            esc_html__('Logged in as %s. Edit your profile.' , "resp"), $user_identity)),
+                        esc_html__('Logged in as ' , "resp"),
+                        $user_identity
+                    ),
+                    sprintf(
+                        '<a href="%1$s">%2$s</a>',
+                        wp_logout_url(apply_filters('the_permalink', get_permalink($post_id), $post_id)),
+                        esc_html__('Log out?' , "resp")
+                    )
                 )
             ),
             'comment_notes_before' => sprintf(
                 '<p class="comment-notes">%s%s</p>',
                 sprintf(
                     '<span id="email-notes">%s</span>',
-                    __('Your email address will not be published.')
+                    esc_html__('Your email address will not be published.' , "resp")
                 ),
                 ($req ? $required_text : '')
             ),
@@ -202,15 +215,15 @@ class RespWalkerComment extends \Walker_Comment
             'class_form'           => 'comment-form',
             'class_submit'         => 'submit',
             'name_submit'          => 'submit',
-            'title_reply'          => __('Leave a Reply'),
+            'title_reply'          => esc_html__('Leave a Reply' , "resp"),
             /* translators: %s: Author of the comment being replied to. */
-            'title_reply_to'       => __('Leave a Reply to %s'),
+            'title_reply_to'       => esc_html__('Leave a Reply to %s' , "resp"),
             'title_reply_before'   => '',
             'title_reply_after'    => '',
             'cancel_reply_before'  => '',
             'cancel_reply_after'   => '',
-            'cancel_reply_link'    => __('Cancel reply'),
-            'label_submit'         => __('Post Comment'),
+            'cancel_reply_link'    => esc_html__('Cancel reply' , "resp"),
+            'label_submit'         => esc_html__('Post Comment' , "resp"),
             'submit_button'        => '',
             'submit_field'         => '<p class="form-submit">%1$s %2$s</p>',
             'format'               => 'xhtml',
@@ -594,9 +607,9 @@ class RespWalkerComment extends \Walker_Comment
         $commenter = wp_get_current_commenter();
 
         if ($commenter['comment_author_email']) {
-            $moderation_note = __('Your comment is awaiting moderation.');
+            $moderation_note = esc_html__('Your comment is awaiting moderation.' , "resp");
         } else {
-            $moderation_note = __('Your comment is awaiting moderation. This is a preview, your comment will be visible after it has been approved.');
+            $moderation_note = esc_html__('Your comment is awaiting moderation. This is a preview, your comment will be visible after it has been approved.', "resp");
         }
 
         $commentID = get_comment_ID();
@@ -628,9 +641,10 @@ class RespWalkerComment extends \Walker_Comment
         Core::trigger("comments-list-item-before-details", true);
 
         printf(
+            '<span class="says">%1$s</span> %2$s',
             /* translators: %s: Comment author link. */
-            __('%s <span class="says">says:</span>'),
-            sprintf('<cite class="fn">%s</cite>', get_comment_author_link($comment))
+            sprintf('<cite class="fn">%s</cite>', get_comment_author_link($comment)),
+            esc_html__('says:')
         );
 
         if ('0' == $comment->comment_approved) {
@@ -647,20 +661,6 @@ class RespWalkerComment extends \Walker_Comment
 
         }
 
-
-        Tag::create([
-            "name" => "div",
-            "class" => "comment-meta commentmetadata"
-        ])->eo();
-
-        Tag::a(sprintf(__('%1$s at %2$s'), get_comment_date('', $comment), get_comment_time()), esc_url(get_comment_link($comment, $args)))->e();
-
-
-        edit_comment_link(__('(Edit)'), '&nbsp;&nbsp;', '');
-
-        Tag::close("div");
-
-
         comment_text(
             $comment,
             array_merge(
@@ -672,6 +672,18 @@ class RespWalkerComment extends \Walker_Comment
                 )
             )
         );
+
+        Tag::create([
+            "name" => "div",
+            "class" => "comment-meta commentmetadata"
+        ])->eo();
+
+        Tag::a(sprintf(esc_html__('%1$s at %2$s'), get_comment_date('', $comment), get_comment_time()), esc_url(get_comment_link($comment, $args)))->e();
+
+
+        edit_comment_link(esc_html__('(Edit)' , "resp"), '&nbsp;&nbsp;', '');
+
+        Tag::close();
 
         comment_reply_link(
             array_merge(
@@ -693,107 +705,4 @@ class RespWalkerComment extends \Walker_Comment
             Tag::close("div");
         }
     }
-
-
-    /*
-    protected function html5_comment($comment, $depth, $args)
-    {
-
-        $tag = ('div' === $args['style']) ? 'div' : 'li';
-
-        $comment_author_url  = get_comment_author_url($comment);
-        $avatar              = get_avatar($comment, $args['avatar_size']);
-        $comment_timestamp = sprintf(__('%1$s at %2$s', RESP_TEXT_DOMAIN), get_comment_date('', $comment), get_comment_time());
-
-        $commenter = wp_get_current_commenter();
-
-        if ( $commenter['comment_author_email'] ) {
-            $moderation_note = __( 'Your comment is awaiting moderation.' );
-        } else {
-            $moderation_note = __( 'Your comment is awaiting moderation. This is a preview, your comment will be visible after it has been approved.' );
-        }
-
-        Core::tag($tag , "comments-item-container" , "" , [
-            "id" => "comment-" . get_comment_ID(),
-            "class" => $this->has_children ? "parent" : ""
-        ])->eo();
-
-        Core::tag("article" , "comments-item-body" , "" , [
-            "id" => "comment-" . get_comment_ID(),
-            "class" => "comment-body"
-        ])->eo();
-
-        Tag::create("footer")->add_class("comment-meta")->eo();
-
-        Tag::create("div")->add_class("comment-author vcard")->eo();
-
-        if (0 != $args['avatar_size']) {
-            if (empty($comment_author_url)) {
-                echo $avatar;
-            } else {
-                Tag::a($avatar, $comment_author_url, ["rel" => "external nofollow"])->add_class("url")->eo();
-            }
-        }
-
-        if ($this->is_comment_by_post_author($comment)) {
-            Tag::span("✓")->add_class("post-author-badge")->e();
-        }
-
-        printf(
-            /* translators: %s: comment author link //
-            wp_kses(
-                __('%s <span class="screen-reader-text says">says:</span>', RESP_TEXT_DOMAIN),
-                array(
-                    'span' => array(
-                        'class' => array(),
-                    ),
-                )
-            ),
-            '<b class="fn">' . get_comment_author_link($comment) . '</b>'
-        );
-
-        if (!empty($comment_author_url)) {
-            Tag::close("a");
-        }
-
-        Tag::close("div");
-
-        Tag::create("div")->add_class("comment-metadata")->eo();
-
-        Tag::a("", esc_url(get_comment_link($comment, $args)))->append(Tag::create([
-            "name" => "time",
-            "content" =>  $comment_timestamp,
-            "attr" => [
-                "datetime" => get_comment_time('c'),
-                "title" =>  $comment_timestamp
-            ]
-        ]))->e();
-
-        edit_comment_link(__('Edit',  RESP_TEXT_DOMAIN));
-
-        Tag::close("div");
-
-        if ('0' == $comment->comment_approved) {
-            Tag::p(__('Your comment is awaiting moderation.', RESP_TEXT_DOMAIN))->add_class("comment-awaiting-moderation")->e();
-        }
-        Tag::close("footer");
-
-        Tag::create("div")->raw(get_comment_text())->e();
-
-        Tag::close("article");
-
-        comment_reply_link(
-            array_merge(
-                $args,
-                array(
-                    'add_below' => 'div-comment',
-                    'depth'     => $depth,
-                    'max_depth' => $args['max_depth'],
-                    'before'    => '<div class="comment-reply">',
-                    'after'     => '</div>',
-                )
-            )
-        );
-    }
-    */
 }

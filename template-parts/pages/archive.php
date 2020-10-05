@@ -2,7 +2,7 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 use Resp\Core, Resp\Tag;
@@ -70,14 +70,18 @@ Core::trigger("before-title", true);
 
 if (!have_posts() && isset($_REQUEST['s'])) {
 
-    Core::tag("h2", "title",  sprintf(__("No results are available for \"%s\"", RESP_TEXT_DOMAIN), $_REQUEST['s']))->e();
+    Core::tag("h2", "title",  sprintf(
+         /* translators: %s is replaced with "string" */
+        esc_html__("No results are available for \"%s\"", "resp"), $_REQUEST['s']))->e();
 
 } else {
 
     if (isset($tax)) {
-        Core::tag("h2", "title",  __($tax->name))->e();
+        Core::tag("h2", "title",  esc_html__($tax->name , "resp"))->e();
     } else if (isset($_REQUEST['s']) && !empty($_REQUEST['s'])) {
-        Core::tag("h2", "title",  sprintf(__("Results for \"%s\"", RESP_TEXT_DOMAIN), $_REQUEST['s']))->e();
+        Core::tag("h2", "title",  sprintf(
+             /* translators: %s is replaced with "string" */
+            esc_html__("Results for \"%s\"", "resp"), $_REQUEST['s']))->e();
     }
 }
 
@@ -85,7 +89,7 @@ Core::trigger("after-title", true);
 
 if (!empty($description)) {
     Core::trigger("before-description", true);
-    Core::tag("h4", "description",  __(wp_strip_all_tags($description)))->e();
+    Core::tag("h4", "description",  esc_html__(wp_strip_all_tags($description)))->e();
     Core::trigger("after-description", true);
 }
 

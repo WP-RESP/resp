@@ -2,14 +2,17 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp;
 
-use \Resp\FileManager as fm, \Resp\ConstantLoader , \Resp\ThemeOptions;
+use \Resp\FileManager as fm, 
+    \Resp\ConstantLoader as cl , 
+    \Resp\ThemeOptions as to, 
+    \Resp\Communicator as com;
 
-defined('RESP_TEXT_DOMAIN') or die;
+defined('RESP_VERSION') or die;
 
 class Core
 {
@@ -27,7 +30,6 @@ class Core
 
         do_action("resp-core--pre-init");
 
-
         add_action('wp_enqueue_scripts', [$this, 'enqueueScripts']);
 
         add_action('after_setup_theme', [$this, 'customThemeSetup']);
@@ -35,8 +37,6 @@ class Core
         add_action('customize_register', [$this, 'installControls']);
 
         add_action('template_redirect', [$this, 'underConstructionHandler'], 10);
-
-
 
         fm::definePath(
             "@templates",
@@ -50,26 +50,16 @@ class Core
             fm::getRespDirectory("assets")
         );
 
+        cl::load(path_join(get_template_directory(), "options.json"));
 
-        self::initOptions();
+        to::init();
+
+        com::init();
 
         self::installComponents();
-
+        
         do_action('resp-core--post-init');
     }
-
-
-    /**
-     * @since 0.9.0
-     */
-    private static function initOptions()
-    {
-        ConstantLoader::load(path_join(get_template_directory(), "options.json"));
-
-        ThemeOptions::init();
-    }
-
-
 
 
     /**
@@ -267,20 +257,20 @@ class Core
     /**
      * @since 0.9.0
      */
-    public function customThemeSetup()
+    function customThemeSetup()
     {
+
+        load_theme_textdomain("resp", get_template_directory() . '/languages');
 
         add_theme_support("customize-selective-refresh-widgets");
 
         ThemeBuilder::load();
 
-        load_theme_textdomain(RESP_TEXT_DOMAIN, get_template_directory() . '/languages');
-
         /*
         $respMaintenanceMode = self::option("resp_maintenance_mode");
 
         if ($respMaintenanceMode && is_admin() && current_user_can("update_core")) {
-            __resp_wp_notice(__("This blog is under construction.",   RESP_TEXT_DOMAIN),  "warning");
+            com::notice(esc_html__("This blog is under construction.",   "resp"),  "warning");
         }
         */
     }
@@ -300,7 +290,7 @@ class Core
     /**
      * @since 0.9.0
      */
-    public function enqueueScripts()
+    function enqueueScripts()
     {
 
         $no_jquery = self::option("resp_no_jquery");
@@ -338,6 +328,7 @@ class Core
         if (is_user_logged_in()) {
             $data["adminAjaxUrl"] =  admin_url('admin-ajax.php');
             $data["isCustomizePreview"] = is_customize_preview();
+            $data["i18n"] = [];
         }
 
         if ($resp_api) {

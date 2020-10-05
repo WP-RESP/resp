@@ -2,12 +2,15 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp\Components;
 
-use Resp\Component;
+use Resp\Component , Resp\DOMHandlers as dom;
+use Resp\Tag;
+
+defined('RESP_VERSION') or die;
 
 class TagHelper extends Component
 {
@@ -32,11 +35,16 @@ class TagHelper extends Component
     {
         $this->define_shortcodes('resp-tag', 'tagShortcode');
 
-        $this->define_shortcodes('resp-tag-attr', 'tagAttributeShortcode');
-
         add_shortcode('resp-tag-group', [$this, 'tagGroupShortcode']);
 
         add_filter('no_texturize_shortcodes', [$this, 'exemptFromWptexturize']);
+
+        __resp_register_parser( 
+            "resp-tag" ,  
+            "resp-tag" , 
+            [$this , "tagShortcode"]
+        );
+        
     }
 
 
@@ -86,65 +94,6 @@ class TagHelper extends Component
     }
 
 
-    /**
-     * @since 0.9.0
-     */
-    private function get_dynamic_atts($tag, &$content)
-    {
-        $atts = [];
-
-        $matches = [];
-
-        $level = strlen(str_replace("resp-tag", "", $tag));
-
-        $pattern = "/\[resp-tag-attr\@{" . $level . "}(.*?)\[\/resp-tag-attr\@{" . $level . "}\]/s";
-
-        preg_match_all($pattern, $content, $matches);
-
-        foreach (array_values($matches[0]) as $value) {
-
-            $json = do_shortcode($value, true);
-
-            $atts = array_merge(json_decode($json, true), $atts);
-
-            $content = str_replace($value, "", $content);
-        }
-
-        return $atts;
-    }
-
-
-    /**
-     * @since 0.9.0
-     */
-    function tagAttributeShortcode($atts = [], $content = null)
-    {
-
-        extract(shortcode_atts([
-            "name" => "",
-            "trim" => "true"
-        ], $atts));
-
-
-        if (empty($name)) {
-            $names = array_values($atts);
-
-            if (count($names) === 0) {
-                return;
-            }
-
-            $name = $names[0];
-        }
-
-        $value = do_shortcode($content);
-
-        if ($trim == "true") {
-            $value = ltrim(rtrim($value));
-        }
-
-        return json_encode([$name => $value], JSON_UNESCAPED_SLASHES);
-    }
-
 
 
     /**
@@ -163,58 +112,32 @@ class TagHelper extends Component
     }
 
 
-
-    /**
-     * @since 0.9.0
-     */
-    private function fix_attributes(&$atts)
-    {
-
-        $html_atts_prefix = ["data", "aria", "accept"];
-
-        $default_keys = array_keys(self::$tag_defaults);
-
-        $fixed_elements = [];
-
-        foreach ($atts as $key => $value) {
-
-            if (in_array($key, $default_keys)) {
-                continue;
-            }
-
-            foreach ($html_atts_prefix as $attr) {
-
-                if (__resp_str_startsWith($key, "{$attr}_")) {
-                    $fixed_elements[] = $key;
-                    $key = str_replace("{$attr}_", "{$attr}-", $key);
-                }
-            }
-
-            $atts["attr"][$key] = $value;
-        }
-
-        foreach ($fixed_elements as $elem) {
-            unset($atts[$elem]);
-        }
-    }
-
-
     /**
      * @since 0.9.0
      */
     function tagShortcode($atts = [], $content = null, $tag)
     {
 
-        $dynamics = $this->get_dynamic_atts($tag, $content);
+        if(!is_array($atts)){
+            $atts  = [];
+        }
 
-        $this->check_for_tags($content);
+        if(!isset($atts["name"]) && !empty($atts) ){
 
-        $atts = array_merge(self::$tag_defaults, $dynamics, is_array($atts) ? $atts : []);
+            $name = array_values($atts)[0];
+            $atts["name"] = $name;
 
-        $this->fix_attributes($atts);
+        }
 
-        $tag = \Resp\Tag::create($atts);
+        dom::getJsonAttributes($atts , $content);
 
-        return $tag->raw($content)->render();
+        if(!empty($content) && empty($atts["content"] ?? "")){
+            $atts["content"] = $content;
+        }
+
+    
+        $result = Tag::create($atts);
+
+        return $result->raw($content)->render();
     }
 }

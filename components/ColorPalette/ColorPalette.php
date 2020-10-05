@@ -2,12 +2,14 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp\Components;
 
 use Resp\Component, Resp\Tag, Resp\ThemeBuilder as tb, Resp\ThemeOptions;
+
+defined('RESP_VERSION') or die;
 
 class ColorPalette extends Component
 {
@@ -56,7 +58,7 @@ class ColorPalette extends Component
 
 
         if (ThemeOptions::is_dashboard()) {
-            add_action("resp-dashboard-after-content", [$this, "dashboardView"]);
+            add_action("resp-dashboard-after-content", [$this, "dashboardView"] , 10);
             add_action("resp-dashboard-enqueue-scripts", [$this, "dashboardScripts"]);
         }
     }
@@ -222,19 +224,31 @@ class ColorPalette extends Component
         }
 
         Tag::create([
-            "class" => ["resp-notice-info", "two-column"]
+            "class" => ["container-fluid"]
         ])->eo();
 
-        Tag::create(["class" => ["first"]])->eo();
+        Tag::create([
+            "class" => ["resp-card", "row" , "resp-color-palette" ]
+        ])->eo();
+
+        Tag::create(["class" => ["col-12" , "col-sm-6" , "desc-col"]])->eo();
+
+        Tag::h2(
+            esc_html__( "Colors" , "resp")
+        )->e();
+
+        Tag::p(
+            esc_html__( "Some colors are defined in the current template. You can change colors in Appearance &gt; Customize." , "resp")
+        )->e();
 
         ThemeOptions::info(
-            __("To customize colors, go to <b>Appearance</b> &gt; <b>Themes</b> page. On this page, find the active theme (<b>RESP</b> in our case) and click on the <b>Customize</b> button next to its title, there you can change colors.", RESP_TEXT_DOMAIN)
+            esc_html__("To customize colors, go to Appearance &gt; Themes page. On this page, find the active theme (RESP in our case) and click on the Customize button next to its title, there you can change colors.", "resp")
         )->e();
 
         Tag::close();
 
 
-        Tag::create(["class" => ["second" , "flex-center" ,  "color-palette"]])->eo();
+        Tag::create(["class" => ["col-12", "col-sm-6" , "flex-center" , "py-5" , "color-list"]])->eo();
 
         foreach (self::$colors as $key => $value) {
 
@@ -252,6 +266,8 @@ class ColorPalette extends Component
             ->e();
             
         }
+
+        Tag::close();
 
         Tag::close();
 

@@ -2,7 +2,7 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 use \Resp\Core, \Resp\Tag , Resp\RespWalkerComment;
@@ -30,17 +30,21 @@ if ($showTitle) {
     Core::tag("h2", "comments-title", "")->eo();
 
     if (!have_comments()) {
-       _e('Leave a comment', RESP_TEXT_DOMAIN);
+       _e('Leave a comment', "resp");
     } elseif ($commentsNumber == 1) {
-        printf(_x('One reply on &ldquo;%s&rdquo;', 'comments title', RESP_TEXT_DOMAIN), esc_html(get_the_title()));
+        printf(
+             /* translators: %s is replaced with "string" */
+            _x('One reply on &ldquo;%s&rdquo;', 'comments title', "resp"), 
+            esc_html(get_the_title()));
     } else {
         printf(
             _nx(
+                /* translators: %1$s is replaced with "string", %2$s is replaced with "string" */
                 '%1$s reply on &ldquo;%2$s&rdquo;',
                 '%1$s replies on &ldquo;%2$s&rdquo;',
                 $commentsNumber,
                 'comments title',
-                RESP_TEXT_DOMAIN
+                "resp"
             ),
             number_format_i18n($commentsNumber),
             esc_html(get_the_title())
@@ -70,8 +74,8 @@ $comment_pagination = paginate_comments_links(
         'echo'      => false,
         'end_size'  => 0,
         'mid_size'  => 0,
-        'next_text' => __('Newer Comments', RESP_TEXT_DOMAIN) . ' <span aria-hidden="true">&rarr;</span>',
-        'prev_text' => '<span aria-hidden="true">&larr;</span> ' . __('Older Comments', RESP_TEXT_DOMAIN),
+        'next_text' => esc_html__('Newer Comments', "resp") . ' <span aria-hidden="true">&rarr;</span>',
+        'prev_text' => '<span aria-hidden="true">&larr;</span> ' . esc_html__('Older Comments', "resp"),
     )
 );
 
@@ -93,7 +97,7 @@ if (comments_open() || pings_open()) {
     
 } elseif (is_single()) {
 
-    Core::tag("p", "comments-closed", __('Comments are closed.', RESP_TEXT_DOMAIN))->e();
+    Core::tag("p", "comments-closed", esc_html__('Comments are closed.', "resp"))->e();
     
 }
 

@@ -2,12 +2,14 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp\Components;
 
-use  Resp\Component;
+use Resp\Component , Resp\DOMHandlers as dom;
+
+defined('RESP_VERSION') or die;
 
 class Posts extends Component
 {
@@ -26,6 +28,19 @@ class Posts extends Component
             $fname = array_pop($parts) . "Shortcode";
             add_shortcode($scode, [$this,  $fname]);
         }
+        
+
+        add_filter("no_texturize_shortcodes" , function($shortcodes) {
+            $shortcodes[] = 'resp-posts-query';
+            return $shortcodes;
+        });
+
+        __resp_register_parser( 
+            "resp-posts" ,  
+            "resp-posts-query" , 
+            [$this , "queryShortcode"]
+        );
+
     }
 
     /**
@@ -42,8 +57,8 @@ class Posts extends Component
             'end_size'           => 1,
             'mid_size'           => 2,
             'prev_next'          => true,
-            'prev_text'          => __('« Previous'),
-            'next_text'          => __('Next »'),
+            'prev_text'          => esc_html__('« Previous' , "resp"),
+            'next_text'          => esc_html__('Next »' , "resp"),
             'type'               => 'plain',
             'add_args'           => false,
             'add_fragment'       => '',
@@ -80,11 +95,76 @@ class Posts extends Component
         return wp_get_attachment_image_src($id, $size);
     }
 
+    /** 
+     * @since 0.9.3
+     */
+    private static function advancedQueryParamsCheck(&$atts){
+
+        $advanced_query_params = [
+            "meta_query_key" => "",
+            "meta_query_value" => "",
+            "meta_query_compare" => "=",
+            "tax_query_taxonomy" => "",
+            "tax_query_field" => "slug",
+            "tax_query_terms" => ""
+        ];
+    
+
+        if(isset($atts["meta_query_key"])) {
+
+            $meta_query_key = $atts["meta_query_key"];
+
+            $meta_query_value = $atts["meta_query_value"] ?? $advanced_query_params["meta_query_value"];
+
+            $meta_query_compare = $atts["meta_query_compare"] ?? $advanced_query_params["meta_query_compare"];
+
+            if(!empty($meta_query_key) && !empty($meta_query_compare)){
+
+                $atts["meta_query"] = [
+                    "key" => $meta_query_key,
+                    "value" => $meta_query_value,
+                    "compare" => $meta_query_compare
+                ];
+    
+            }
+
+        }
+
+        if(isset($atts["tax_query_taxonomy"])) {
+
+            $tax_query_taxonomy = $atts["tax_query_taxonomy"];
+
+            $tax_query_terms = $atts["tax_query_terms"] ?? $advanced_query_params["tax_query_terms"];
+
+            $tax_query_field = $atts["tax_query_field"] ?? $advanced_query_params["tax_query_field"];
+
+            if(!empty($tax_query_taxonomy) && !empty($tax_query_terms)){
+
+                $atts["tax_query"] = [
+                    "taxonomy" => $tax_query_taxonomy,
+                    "field" => $tax_query_field,
+                    "terms" => $tax_query_terms
+                ];
+    
+            }
+
+            
+
+        }
+
+        foreach($advanced_query_params as $key => $default){
+
+            unset($atts[$key]);
+
+        }
+
+    }
+
 
     /**
      * @since 0.9.0
      */
-    function queryShortcode($atts = [], $content = null)
+    function queryShortcode($atts = [], $content = null , $tag)
     {
 
         global $wp_query, $post;
@@ -105,6 +185,10 @@ class Posts extends Component
         {
             $atts = [];
         }
+
+
+        // get json attributes
+        dom::getJsonAttributes($atts , $content);
 
         if($paginate == "true"){
 
@@ -166,13 +250,11 @@ class Posts extends Component
             $atts["post__in"] = self::$reserved_posts[$reserves];
         }
 
-
         if ($not_reserved == "true") {
             $atts["post__not_in"] = array_merge(...array_values(self::$reserved_posts));
         } else if (isset(self::$reserved_posts[$not_reserved])) {
             $atts["post__not_in"] = self::$reserved_posts[$not_reserved];
         }
-
 
         if (isset($taxonomy) && isset($taxonomy_slug)) {
             $atts[$taxonomy] =  $taxonomy_slug;
@@ -183,6 +265,8 @@ class Posts extends Component
             $postsPerPage = get_option( 'posts_per_page' );
             $atts = array_merge($atts , [ 'posts_per_page' => $postsPerPage]);
         }
+
+        self::advancedQueryParamsCheck($atts);
 
         $wp_query = new \WP_Query($atts);
 

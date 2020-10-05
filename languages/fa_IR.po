@@ -1,0 +1,348 @@
+# Copyright (C) 2019 WP-RESP
+# This file is distributed under the Apache License, Version 2.0.
+msgid ""
+msgstr ""
+"Project-Id-Version: Resp 0.9.2\n"
+"Report-Msgid-Bugs-To: https://wp-resp.com/support\n"
+"Last-Translator: FULL NAME <me@rmanaf.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-09-11T13:56:59+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.4.0\n"
+"X-Domain: resp\n"
+
+#. Theme Name of the theme
+#: includes/ThemeOptions.php:267
+#: includes/ThemeOptions.php:268
+msgid "Resp"
+msgstr "رسپ"
+
+#. Theme URI of the theme
+msgid "https://wp-resp.com"
+msgstr ""
+
+#. Description of the theme
+#: includes/ThemeOptions.php:212
+msgid "The most flexible and powerful WordPress designing tool."
+msgstr "انعطاف‌پذیرترین و قدرتمندترین ابزار طراحی ووردپرس."
+
+#. Author of the theme
+msgid "Rmanaf"
+msgstr ""
+
+#. Author URI of the theme
+msgid "https://rmanaf.com"
+msgstr ""
+
+#: 404.php:24
+msgid "404"
+msgstr "۴.۴"
+
+#: 404.php:28
+msgid "Page Not Found"
+msgstr "صفحه‌ای یافت نشد"
+
+#: 404.php:32
+msgid "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable."
+msgstr "صفحه‌ای که به دنبال آن هستید ممکن است حذف نام آن تغییر و یا بطور موقت از دسترس خارج شده باشد."
+
+#: 404.php:36
+msgid "Back To Homepage"
+msgstr "برگشت به خانه"
+
+#: comments.php:33
+msgid "Leave a comment"
+msgstr "نظری بگذارید"
+
+#. translators: %s is replaced with "string"
+#: comments.php:37
+msgctxt "comments title"
+msgid "One reply on &ldquo;%s&rdquo;"
+msgstr "یک پاسخ برای &ldquo;%s&rdquo;"
+
+#. translators: %1$s is replaced with "string", %2$s is replaced with "string"
+#: comments.php:41
+msgctxt "comments title"
+msgid "%1$s reply on &ldquo;%2$s&rdquo;"
+msgid_plural "%1$s replies on &ldquo;%2$s&rdquo;"
+msgstr[0] ""
+msgstr[1] ""
+
+#: comments.php:77
+msgid "Newer Comments"
+msgstr ""
+
+#: comments.php:78
+msgid "Older Comments"
+msgstr ""
+
+#: comments.php:100
+msgid "Comments are closed."
+msgstr ""
+
+#: components/ColorPalette/ColorPalette.php:237
+msgid "Colors"
+msgstr "رنگها"
+
+#: components/ColorPalette/ColorPalette.php:241
+msgid "Some colors are defined in the current template. You can change colors in Appearance &gt; Customize."
+msgstr "تعدادی رنگ در این پوسته تعریف شده‌اند. برای تغییر رنگها به قسمت شخصی سازی بروید."
+
+#: components/ColorPalette/ColorPalette.php:245
+msgid "To customize colors, go to Appearance &gt; Themes page. On this page, find the active theme (RESP in our case) and click on the Customize button next to its title, there you can change colors."
+msgstr "برای شخصی سازی رنگها به قسمت نمایش &gt; پوسته ها. در این صفحه قسمت پوسته فعال رفته و بر روی شخصی سازی کلیک کنید."
+
+#: components/Posts/Posts.php:47
+msgid "« Previous"
+msgstr "« قبلی"
+
+#: components/Posts/Posts.php:48
+msgid "Next »"
+msgstr "بعدی »"
+
+#: components/Sidebar/Sidebar.php:44
+msgid "Header"
+msgstr "سربرگ"
+
+#: components/Sidebar/Sidebar.php:45
+#: components/Sidebar/Sidebar.php:56
+msgid "Widgets will appear on all pages of your blog site."
+msgstr "ابزارکها در تمامی صفحات نشان داده می‌شوند."
+
+#: components/Sidebar/Sidebar.php:55
+msgid "Footer"
+msgstr "پاورقی"
+
+#: components/ThemeValues/ThemeValues.php:156
+msgid "Values"
+msgstr "مقادیر"
+
+#. translators: %s is replaced with "string"
+#: components/ThemeValues/ThemeValues.php:485
+msgid "Value not defined: %s"
+msgstr "مقدار تعریف نشده: %s"
+
+#: includes/AdvancedSettings.php:45
+msgid "Advanced Settings"
+msgstr "تنظیمات پیشرفته"
+
+#. translators: %s is replaced with "string"
+#: includes/ConstantLoader.php:56
+msgid "File not found: \"%s\""
+msgstr "فایل \"%s\" پیدا نشد"
+
+#. translators: %s is replaced with "string"
+#: includes/ThemeBuilder.php:109
+msgid "File not Found \"%s\""
+msgstr "فایل \"%s\" پیدا نشد"
+
+#: includes/ThemeBuilder.php:241
+msgid "Unable to find \"config.json\"."
+msgstr "امکان دسترسی به فایل \"config.json\" نیست. "
+
+#: includes/ThemeBuilder.php:254
+msgid "Unable to parse data."
+msgstr "امکان تجزیه‌وتحلیل اطلاعات نیست."
+
+#: includes/ThemeOptions.php:441
+msgid "Save Changes"
+msgstr "ذخیره تغییرات"
+
+#: includes/ThemeOptions.php:73
+msgid "Backup"
+msgstr "پشتیبان"
+
+#: includes/ThemeOptions.php:202
+msgid "Version"
+msgstr "نسخه"
+
+#. translators: %1$s is replaced with "string"
+#: includes/ThemeOptions.php:216
+msgid "Please see %1$s to learn more about RESP."
+msgstr "لطفا برای کسب اطلاعات بیشتر در مورد رسپ صفحه %1$s را مشاهده کنید."
+
+#: includes/ThemeOptions.php:220
+msgid "Documentation"
+msgstr "مستندات"
+
+#. translators: %1$s is replaced with "string"
+#: includes/ThemeOptions.php:230
+msgid "You may need certain %1$s or tools to create templates."
+msgstr "ممکن است شما برای ساخت پوسته به ‌%1$s خاصی نیاز داشته باشید."
+
+#: includes/ThemeOptions.php:234
+msgid "Plugins"
+msgstr "افزونه"
+
+#: includes/ThemeOptions.php:241
+msgid "Install Template"
+msgstr "نصب پوسته"
+
+#: includes/walkers/RespWalkerComment.php:89
+msgid "Name"
+msgstr "نام"
+
+#: includes/walkers/RespWalkerComment.php:93
+msgid "Email"
+msgstr "ایمیل"
+
+#: includes/walkers/RespWalkerComment.php:103
+msgid "Website"
+msgstr "وب‌سایت"
+
+#: includes/walkers/RespWalkerComment.php:117
+msgid "Save my name, email, and website in this browser for the next time I comment."
+msgstr "نام ، ایمیل و وب سایت من را برای دفعه بعدی که نظر می دهم در این مرورگر ذخیره کن."
+
+#. translators: %1$s is replaced with "string"
+#: includes/walkers/RespWalkerComment.php:174
+msgid "You must be %1$s to post a comment."
+msgstr "شما باید %1$s تا بتوانید دیدگاهتان را ارسال کنید."
+
+#: includes/walkers/RespWalkerComment.php:179
+msgid "logged in"
+msgstr "وارد بشوید"
+
+#. translators: %s is replaced with "string"
+#: includes/walkers/RespWalkerComment.php:192
+msgid "Logged in as %s. Edit your profile."
+msgstr "وارد شده بعنوان %s ویرایش پروفایل."
+
+#: includes/walkers/RespWalkerComment.php:193
+msgid "Logged in as "
+msgstr "وارد شده به عنوان "
+
+#: includes/walkers/RespWalkerComment.php:199
+msgid "Log out?"
+msgstr "خارج می‌شوید؟"
+
+#: includes/walkers/RespWalkerComment.php:207
+msgid "Your email address will not be published."
+msgstr "آدرس ایمیل شما منتشر نخواهد شد."
+
+#: includes/walkers/RespWalkerComment.php:218
+msgid "Leave a Reply"
+msgstr "پاسخی بگذارید"
+
+#. translators: %s: Author of the comment being replied to.
+#: includes/walkers/RespWalkerComment.php:220
+msgid "Leave a Reply to %s"
+msgstr "پاسخی بگذارید برای %s"
+
+#: includes/walkers/RespWalkerComment.php:225
+msgid "Cancel reply"
+msgstr "انصراف از پاسخ"
+
+#: includes/walkers/RespWalkerComment.php:226
+msgid "Post Comment"
+msgstr "ارسال دیدگاه"
+
+#: includes/walkers/RespWalkerComment.php:610
+msgid "Your comment is awaiting moderation."
+msgstr "دیدگاه شما در انتظار تایید است."
+
+#: includes/walkers/RespWalkerComment.php:612
+msgid "Your comment is awaiting moderation. This is a preview, your comment will be visible after it has been approved."
+msgstr "دیدگاه شما در انتظار تایید است. این یک پیش نمایش است و دیدگاه شما بعد از تایید مدیر سایت برای عموم قابل دیدن است."
+
+#: includes/walkers/RespWalkerComment.php:684
+msgid "(Edit)"
+msgstr "(ویرایش)"
+
+#: searchform.php:31
+msgid "Search..."
+msgstr "جستجو..."
+
+#: searchform.php:40
+msgid "Go"
+msgstr "برو"
+
+#. translators: %s is replaced with "string"
+#: template-parts/pages/archive.php:75
+msgid "No results are available for \"%s\""
+msgstr "نتیجه ای برای \"%s\" یافت نشد"
+
+#. translators: %s is replaced with "string"
+#: template-parts/pages/archive.php:84
+msgid "Results for \"%s\""
+msgstr "نتایج برای \"%s\""
+
+#: template-parts/pages/under-construction.php:20
+msgid "Under Construction"
+msgstr "در دست ساخت"
+
+#: template-parts/pages/under-construction.php:22
+msgid "Sorry, We are running some updates. We'll be back soon."
+msgstr ".هم‌اکنون در‌حال ایجاد تغییراتی در سایت هستیم"
+
+#: template-parts/sections/pagination.php:19
+msgid "Previous"
+msgstr "قبلی"
+
+#: template-parts/sections/pagination.php:20
+msgid "Next"
+msgstr "بعدی"
+
+#: assets/js/resp-admin.js:43
+msgid "A New Version Is Available"
+msgstr "نسخه جدیدتری در دسترس است"
+
+msgid "Dashboard"
+msgstr "پیشخوان"
+
+msgid "Configuration"
+msgstr "پیکربندی"
+
+msgid "Script"
+msgstr "اسکریپت"
+
+msgid "Edit"
+msgstr "ویرایش"
+
+msgid "Settings"
+msgstr "تنظیمات"
+
+msgid "Backup configuration before making changes."
+msgstr "قبل از تغییر پیکر‌بندی نسخه پشتیبان تهیه کنید."
+
+msgid "The following code will be added to the document footer."
+msgstr "کد های زیر به قسمت فوتر صفحه اضافه خواهند شد."
+
+msgid "Development-Mode"
+msgstr "نوع-گسترش دهنده"
+
+msgid "Enable Developer tools."
+msgstr "فعال سازی ابزار گسترش."
+
+msgid "Maintenance-Mode"
+msgstr "نوع تعمیرات"
+
+msgid "Show \"Under Construction\" page."
+msgstr "نمایش صفحه دردست طراحی."
+
+
+msgid "No-jQuery"
+msgstr "بدون jQuery"
+
+msgid "Remove jQuery library."
+msgstr "حذف کتابخانه jQuery."
+
+msgid "Default Classes"
+msgstr "کلاس‌های معمول"
+
+msgid "Add default classes to the elements."
+msgstr "افزودن کلاس‌های معمول به عناصر."
+
+msgid "Isolation"
+msgstr "تفکیک"
+
+msgid "Isolate filters and classes."
+msgstr "تفکیک فیلترها و کلاس‌ها"
+
+msgid "RESP API"
+msgstr "رسپ API"
+
+msgid "Use RESP API modules."
+msgstr "استفاده از ماژول API رسپ."

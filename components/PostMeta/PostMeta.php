@@ -2,12 +2,15 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp\Components;
 
-use  Resp\Component, Resp\FileManager, Resp\Tag, Resp\ThemeBuilder;
+use Resp\Component, Resp\FileManager, Resp\Tag, Resp\ThemeBuilder;
+use Resp\DOMHandlers;
+
+defined('RESP_VERSION') or die;
 
 class PostMeta extends Component
 {
@@ -57,7 +60,7 @@ class PostMeta extends Component
             "ignore_html" => false
         ], $atts));
 
-
+        DOMHandlers::getJsonAttributes($atts , $content);
 
         if (empty($name)) {
 
@@ -96,6 +99,8 @@ class PostMeta extends Component
     private function getMeta($atts, $name, $id, $do_shortcode, $ignore_html)
     {
 
+        $post = null;
+
         if (in_array($name, self::$post_data)) {
 
             $post = get_post($id);
@@ -115,6 +120,10 @@ class PostMeta extends Component
             if(isset($atts["terms"])){
                 return self::getTerms($id, $atts["terms"] , $atts);
             }
+        }
+
+        if (__resp_str_startsWith($name , "@author:") && !is_null($post) ) {
+            return get_the_author_meta( str_replace("@author:" , "" , $name) , $post->post_author);
         }
 
         if ($name === "excerpt") {

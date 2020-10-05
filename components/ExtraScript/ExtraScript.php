@@ -2,12 +2,14 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp\Components;
 
-use  \Resp\Component, \Resp\Core, \Resp\ThemeOptionWrapper as tow;
+use \Resp\Component, \Resp\Core, \Resp\ThemeOptionWrapper as tow;
+
+defined('RESP_VERSION') or die;
 
 class ExtraScript extends Component
 {

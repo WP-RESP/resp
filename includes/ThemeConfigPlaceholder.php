@@ -2,12 +2,14 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp;
 
 use \Resp\ThemeBuilder, \Resp\Tag, \Resp\ThemeOptionWrapper as tow , \Resp\ThemeOptions;
+
+defined('RESP_VERSION') or die;
 
 class ThemeConfigPlaceholder
 {
@@ -48,7 +50,7 @@ class ThemeConfigPlaceholder
 
         do_action( "resp-admin--before-config-placeholder_{$currentTab}" );
 
-        self::configPlaceholder()->addClass("hidden")->e();
+        self::configPlaceholder()->addClass("resp-hidden")->e();
     }
 
     /**

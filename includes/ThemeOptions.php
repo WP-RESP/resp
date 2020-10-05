@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp;
+
+use \Resp\FileManager as fm;
 
 defined('RESP_VERSION') or die;
 
@@ -17,6 +20,8 @@ class ThemeOptions
     static function init()
     {
 
+        $clazz = get_called_class();
+
         self::registerTabs();
 
         self::setupAdvancedSettingsPage();
@@ -25,9 +30,17 @@ class ThemeOptions
 
         self::registerConfigForm();
 
-        add_action('resp-settings-after-content',  "\Resp\ThemeOptions::settingsAfterContent");
+        add_action('resp-settings-after-content',  "$clazz::settingsAfterContent");
 
-        add_action("resp-settings-after-content_dashboard", "\Resp\ThemeOptions::renderDashboard");
+        add_action("resp-settings-after-content_dashboard", "$clazz::renderDashboard");
+
+        add_action( "resp-dashboard-after-content" , "$clazz::dashboardDataHolder" , PHP_INT_MAX);
+
+        add_action( 
+            "resp-admin--wrapper-form_configuration_header-items", 
+            "$clazz::configBackupHolder"
+        );
+
     }
 
 
@@ -41,16 +54,64 @@ class ThemeOptions
 
 
     /**
+     * @since 0.9.2
+     */
+    static function configBackupHolder($items){
+        
+        $nonce = wp_create_nonce( "request-backup-nonce" );
+
+        $items[] = Tag::create([
+            "class" => "horizontal-flex-space"
+        ]);
+
+        $items[] = Tag::create([
+                "id" => "config_backup_wrap",
+                "class" => "resp-spinner-container",
+                "attr" => [
+                    "data-nonce" => $nonce
+                ]
+            ])->append([
+                Tag::create(["class" => "resp-spinner"]),
+                Tag::button( esc_html__("Backup" , "resp"))->set([
+                    "id" => "config_backup_btn"
+                ])
+            ]);
+
+        return $items;
+
+    }
+
+
+    /**
      * @since 0.9.0
      */
     private static function registerConfigForm()
     {
         ThemeConfigPlaceholder::registerForm(
             "Configuration",
-            "Backup the configuration before making changes.",
+            "Backup configuration before making changes.",
             false,
             "resp-settings-after-content_edit"
         );
+    }
+
+    /**
+     * @since 0.9.2
+     */
+    static function dashboardDataHolder(){
+
+        $nonce = wp_create_nonce('dashboard-data-nonce');
+
+        Tag::create([
+            "attr" => [
+                "data-nonce" => $nonce
+            ],
+            "id" => "server_info_wrap",
+            "class" => ["resp-spinner-container" , "busy"]
+            ])->append([
+                Tag::create(["class" => "resp-spinner large"]) 
+            ])->e();
+
     }
 
 
@@ -59,11 +120,14 @@ class ThemeOptions
      */
     private static function setupAdminHooks()
     {
-        add_action('admin_init', '\Resp\ThemeOptions::adminInit');
 
-        add_action('admin_menu', '\Resp\ThemeOptions::adminMenu', 0);
+        $clazz = get_called_class();
 
-        add_action('admin_enqueue_scripts', '\Resp\ThemeOptions::adminEnqueueScripts');
+        add_action('admin_init', "$clazz::adminInit");
+
+        add_action('admin_menu', "$clazz::adminMenu", 0);
+
+        add_action('admin_enqueue_scripts', "$clazz::adminEnqueueScripts");
     }
 
 
@@ -72,11 +136,14 @@ class ThemeOptions
      */
     private static function registerTabs()
     {
-        add_action('resp-admin--tabs',  '\Resp\ThemeOptions::respDashboardTab', 1);
 
-        add_action('resp-admin--tabs',  '\Resp\ThemeOptions::respEditTab', 10);
+        $clazz = get_called_class();
 
-        add_action('resp-admin--tabs',  '\Resp\ThemeOptions::respSettingsTab', 11);
+        add_action('resp-admin--tabs',  "$clazz::respDashboardTab", 1);
+
+        add_action('resp-admin--tabs',  "$clazz::respEditTab", 10);
+
+        add_action('resp-admin--tabs',  "$clazz::respSettingsTab", 11);
     }
 
 
@@ -116,52 +183,80 @@ class ThemeOptions
     static function renderDashboard()
     {
 
+        $nonce = wp_create_nonce('version-data-nonce');
+
         Tag::create([
-            "class" => ["resp-notice-info", "two-column"]
+            "class" => ["container-fluid"]
         ])->eo();
 
+        Tag::create([
+            "class" => ["row" , "resp-card", "product-info"]
+        ])->eo();
 
+        Tag::create(["class" => ["col-12" , "col-sm-6", "flex-center", "logo" , "p-5" , "p-sm-0"]])->eo();
 
-        Tag::create(["class" => ["first", "flex-center", "logo"]])->eo();
-
-        Tag::img(FileManager::getRespAssetsDirectoryUri("img/resp-logo.svg"))->addClass("settings-logo")->e();
+        Tag::img(fm::getRespAssetsDirectoryUri("img/resp-logo.svg"))->addClass("settings-logo")->e();
 
         Tag::close();
 
+        Tag::create(["class" => ["col-12" , "col-sm-6" ]])->eo();
 
-
-        Tag::create(["class" => ["second", "changelog"]])->eo();
-
-
-
-        Tag::h3(__("Version", RESP_TEXT_DOMAIN) . " " . RESP_VERSION, [
-            "class" => "version"
+        Tag::h3(esc_html__("Version", "resp") . " " . RESP_VERSION, [])->set([
+            "attr" => ["data-nonce" => $nonce],
+            "class" => ["version", "resp-spinner-container" , "busy"],
+            "id" => "version_holder"
+        ])->append([
+            Tag::create([
+                "class" => "resp-spinner"
+            ])
         ])->e();
 
+        Tag::p(esc_html__("The most flexible and powerful WordPress designing tool.", "resp"))->e();
 
-
-        Tag::p(__("The most flexible and powerful WordPress designing tool.", RESP_TEXT_DOMAIN))->e();
-
-        Tag::p(sprintf(
-            __('Please see <a target="_blank" href="%s">documentation</a> to learn more.', RESP_TEXT_DOMAIN),
-            esc_url('https://github.com/WP-RESP/resp/wiki')
+        Tag::p(sprintf( 
+            /* translators: %1$s is replaced with "string" */
+            esc_html__('Please see %1$s to learn more about RESP.', 'resp'),
+            sprintf(
+                '<a target="_blank" href="%s">%s</a>',
+                esc_url( 'https://github.com/WP-RESP/resp/wiki' ),
+                esc_html__( 'Documentation', 'resp' )
+            )
         ))->e();
 
+        $ciUrl =  esc_url("https://wordpress.org/plugins/search/code+snippet+injection/");
 
-        if (!is_plugin_active("code-injection/wp-code-injection.php") && current_user_can("update_core")) {
+        self::info(
+            sprintf(
+                /* translators: %1$s is replaced with "string" */
+                esc_html__('You may need certain %1$s or tools to create templates.', 'resp'),
+                sprintf(
+                    '<a target="_blank" href="%1$s">%2$s</a>',
+                    $ciUrl,
+                    esc_html__( 'Plugins', 'resp' )
+                )
+            )
+        )->e();
+        
+        /*
+        Tag::p()->append([
+            Tag::a(esc_html__("Install Template" , "resp") , "javascript:void(0)")->set([
+                "id" => ["install_template_btn"],
+                "class" => ["button" , "button-primary"]
+            ])
+        ])->e();
+         */
 
-            $ciUrl =  esc_url("https://wordpress.org/plugins/code-injection/");
-
-            self::info(
-                sprintf(__("You may need <a href=\"%s\" target=\"_blank\">Code Injection</a> plugin to create templates.", RESP_TEXT_DOMAIN), $ciUrl)
-            )->e();
-        }
-
+        
         Tag::close();
 
         Tag::close();
 
+        Tag::close();
+
+       
         do_action("resp-dashboard-after-content");
+
+
     }
 
 
@@ -170,9 +265,14 @@ class ThemeOptions
      */
     static function adminMenu()
     {
+
+        if(file_exists(fm::getRespDirectory(".nongenuine"))){
+            return;
+        }
+
         add_menu_page(
-            __("Resp", RESP_TEXT_DOMAIN),
-            __("Resp", RESP_TEXT_DOMAIN),
+            esc_html__("Resp", "resp"),
+            esc_html__("Resp", "resp"),
             "update_core",
             RESP_OPTION_GROUP,
             'Resp\ThemeOptions::renderOptionsPage',
@@ -221,12 +321,23 @@ class ThemeOptions
      */
     static function adminEnqueueScripts()
     {
-        wp_enqueue_style("resp-admin", FileManager::getRespAssetsDirectoryUri("css/resp-admin.min.css"), [], RESP_VERSION, "all");
 
-        wp_enqueue_style("resp-font",  FileManager::getRespAssetsDirectoryUri("css/resp-font.min.css"), [], RESP_VERSION,  "all");
+        $screen = get_current_screen();
 
-        wp_enqueue_script("resp-admin", FileManager::getRespAssetsDirectoryUri("js/resp-admin.min.js"), ["jquery", "resp"], RESP_VERSION, true);
+       
+        wp_enqueue_style("resp-icons",  fm::getRespAssetsDirectoryUri("css/icons.min.css"), [], RESP_VERSION,  "all");
 
+        wp_enqueue_style("resp-admin", fm::getRespAssetsDirectoryUri("css/resp-admin.min.css"), [], RESP_VERSION, "all");
+
+
+        if($screen->id != "toplevel_page_resp"){
+            return;
+        }
+
+
+        wp_enqueue_style("bootstrap-grid",  fm::getRespAssetsDirectoryUri("css/bootstrap-grid.min.css"), [], RESP_VERSION,  "all");
+
+        wp_enqueue_script("resp-admin", fm::getRespAssetsDirectoryUri("js/resp-admin.min.js"), ["jquery", "resp"], RESP_VERSION, true);
 
         add_action("resp-localize-script", "\Resp\ThemeOptions::localizeAdminDashboardData", 10, 1);
 
@@ -263,6 +374,8 @@ class ThemeOptions
 
         $data['admin']['editor'] = apply_filters('resp-admin--editor',  $data['admin']['editor']);
 
+        $data['admin']['mainServer'] = RESP_MAIN_SERVER;
+
         return $data;
     }
 
@@ -272,7 +385,7 @@ class ThemeOptions
      */
     static function getCurrentTab()
     {
-        return $_GET["tab"] ?: "dashboard";
+        return $_GET["tab"] ?? "dashboard";
     }
 
 
@@ -309,7 +422,7 @@ class ThemeOptions
         $form = Tag::form("settings", "options.php");
 
         if ($currentTab ==  "settings") {
-            $form->set(["class" => "resp-notice-wrapper"]);
+            $form->set(["class" => "resp-card"]);
         }
 
         $form->eo();
@@ -342,7 +455,7 @@ class ThemeOptions
         $currentTab = self::getCurrentTab();
 
         if (in_array($currentTab, ["settings", "edit"])) {
-            submit_button("Save Changes");
+            submit_button(esc_html__("Save Changes" , "resp"));
         }
     }
 
@@ -358,10 +471,10 @@ class ThemeOptions
         $name = sanitize_title($title);
 
         $icon = Tag::create("span")->set([
-            "class" => "respicon-$icon"
+            "class" => "ri-$icon"
         ]);
 
-        $link = Tag::a(__($title, RESP_TEXT_DOMAIN), admin_url("admin.php?page=resp&tab=$name"))
+        $link = Tag::a(esc_html__($title, "resp"), admin_url("admin.php?page=resp&tab=$name"))
             ->set(["append_content" => true])
             ->addClass("nav-tab");
 

@@ -2,14 +2,15 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp\Components;
 
+use Resp\DOMHandlers;
 use Resp\Tag, Resp\Component, Resp\FileManager as fm, Resp\ThemeBuilder as tb;
 
-defined("RESP_TEXT_DOMAIN") or die;
+defined('RESP_VERSION') or die;
 
 class AssetManager extends Component
 {
@@ -299,17 +300,18 @@ class AssetManager extends Component
             $src = fm::getRespAssetsDirectoryUri($url);
         }
 
+        $attributes = [
+            "id" => __resp_array_item($atts, "id", ""),
+            "class" => __resp_array_item($atts, "class", []),
+            "width" => __resp_array_item($atts, "width", null),
+            "height" => __resp_array_item($atts, "height", null),
+            "alt" => __resp_array_item($atts, "alt", "")
+        ];
 
+        DOMHandlers::getJsonAttributes($attributes , $content);
 
         if ($image) {
-
-            return \Resp\Tag::img($src, [
-                "id" => __resp_array_item($atts, "id", ""),
-                "class" => __resp_array_item($atts, "class", []),
-                "width" => __resp_array_item($atts, "width", null),
-                "height" => __resp_array_item($atts, "height", null),
-                "alt" => __resp_array_item($atts, "alt", "")
-            ])->render(false);
+            return \Resp\Tag::img($src, $attributes)->render(false);
         }
 
         return $src;
@@ -349,20 +351,19 @@ class AssetManager extends Component
 
 
         if(!in_array($info["extension"] , ["html" , "htm" , "temp" , "tmp"] )){
-            return;
+            return Tag::code("Invalid file extension \"$path\"")->render();
         }
 
 
         if(!file_exists($path)){
-            Tag::code("File not Found \"$path\"")->e();
-            return;
+            return Tag::code("File not Found \"$path\"")->render();
         }
-
 
         $temp = file_get_contents($path);
 
-
         return do_shortcode($temp, false);
+
+        
 
 
     }

@@ -2,10 +2,12 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp;
+
+defined('RESP_VERSION') or die;
 
 class Tag
 {
@@ -457,6 +459,19 @@ class Tag
 
 
     /**
+     * @since 0.9.2
+     */
+    static function button($text = "", $atts = [])
+    {
+        return self::create([
+            "name" => "button",
+            "content" => $text,
+            "attr" => $atts
+        ]);
+    }
+
+
+    /**
      * @since 0.9.0
      */
     static function inputFor($id, $type = "text", $value = "", $atts = [])
@@ -554,7 +569,7 @@ class Tag
     /**
      * @since 0.9.0
      */
-    static function p($text, $atts = [])
+    static function p($text = "", $atts = [])
     {
         return self::create([
             "name" => "p",
@@ -652,7 +667,7 @@ class Tag
     /**
      * @since 0.9.0
      */
-    static function span($text, $atts = [])
+    static function span($text = "", $atts = [])
     {
         return self::create([
             "name" => "span",
@@ -706,7 +721,7 @@ class Tag
     /**
      * @since 0.9.0
      */
-    static function checkboxFor($id, $label, $value = true, $atts = [])
+    static function checkboxFor($id, $label, $value , $atts = [])
     {
 
         $chkbox = self::create([
@@ -714,12 +729,12 @@ class Tag
             "id" => $id,
             "attr" => array_merge([
                 "type" => "checkbox",
-                "value" => "1",
+                "value" => "true",
                 "name" => $id
             ], $atts)
         ]);
 
-        if ($value) {
+        if ( $value == "true" ) {
             $chkbox->attr("checked", true);
         }
 
@@ -728,6 +743,47 @@ class Tag
             "content" => $label,
             "append_content" => true
         ])->append($chkbox);
+    }
+
+    /**
+     * @since 0.9.3
+     */
+    static function selectFor($id, $value , $options = [], $atts = [])
+    {
+
+        $select = self::create([
+            "name" => "select",
+            "id" => $id,
+            "attr" => array_merge([
+                "name" => $id
+            ], $atts)
+        ]);
+
+        foreach($options as $key => $param){
+
+            $val = $param["value"] ?? $key;
+
+            $attr = [
+                "value" =>  $val
+            ];
+
+            if($val == $value){
+                $attr["selected"] = "selected";
+            }
+
+            $lbl = is_array($param) ? ($param["label"] ?? "---") : $param;
+
+            $select->append(Tag::create([
+                "name" => "option",
+                "attr" => array_merge_recursive($attr , $param["attr"] ?? []),
+                "content" => $lbl
+            ]));
+
+        }
+
+
+        return $select;
+
     }
 
 

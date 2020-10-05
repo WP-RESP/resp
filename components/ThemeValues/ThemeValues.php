@@ -2,12 +2,14 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp\Components;
 
-use  Resp\Core, Resp\Component, Resp\Tag, Resp\ThemeBuilder as tb;
+use Resp\Core, Resp\Component, Resp\Tag, Resp\ThemeBuilder as tb;
+
+defined('RESP_VERSION') or die;
 
 class ThemeValues extends Component
 {
@@ -151,14 +153,14 @@ class ThemeValues extends Component
         $panels = __resp_array_item($data, "panels", []);
 
         $wp_customize->add_section("resp_customize_values_section", [
-            "title"      => __('Values', RESP_TEXT_DOMAIN),
+            "title"      => esc_html__('Values', "resp"),
             "priority"   => 30,
         ]);
 
         foreach ($panels as $key => $value) {
             $panel_args = [
-                "title"      => __(__resp_array_item($value, "title", $key), RESP_TEXT_DOMAIN),
-                "description" => __(__resp_array_item($value, "description", ""), RESP_TEXT_DOMAIN),
+                "title"      => esc_html__(__resp_array_item($value, "title", $key), "resp"),
+                "description" => esc_html__(__resp_array_item($value, "description", ""), "resp"),
                 "priority"   => __resp_array_item($value, "priority", 30)
             ];
             $wp_customize->add_panel($key, array_merge($panel_args, $value));
@@ -166,8 +168,8 @@ class ThemeValues extends Component
 
         foreach ($sections as $key => $value) {
             $section_args = [
-                "title"      => __(__resp_array_item($value, "title", $key), RESP_TEXT_DOMAIN),
-                "description" => __(__resp_array_item($value, "description", ""), RESP_TEXT_DOMAIN),
+                "title"      => esc_html__(__resp_array_item($value, "title", $key), "resp"),
+                "description" => esc_html__(__resp_array_item($value, "description", ""), "resp"),
                 "priority"   => __resp_array_item($value, "priority", 30)
             ];
             $wp_customize->add_section($key, array_merge($section_args, $value));
@@ -479,7 +481,8 @@ class ThemeValues extends Component
 
         if(!isset(self::$values[$mod_name]))
         {
-            __resp_error(sprintf(__("Value not defined: %s", RESP_TEXT_DOMAIN), $mod_name));
+             /* translators: %s is replaced with "string" */
+            __resp_error(sprintf(esc_html__("Value not defined: %s", "resp"), $mod_name));
             return;
         }
 

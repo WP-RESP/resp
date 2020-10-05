@@ -2,12 +2,12 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp;
 
-use \Resp\Tag, \Resp\FileManager as fm , \Resp\Communicator;
+use \Resp\Tag, \Resp\FileManager as fm , \Resp\Communicator as com;
 
 defined('RESP_VERSION') or die;
 
@@ -21,6 +21,13 @@ class ThemeBuilder
     const DATA_OPT_NAME = "resp_theme_data";
 
     const CONFIG_FILE_EXTENSION = "json";
+
+    const BLOG_INFO_PARAMS =  [
+        "name", "description", "wpurl", "url", "admin_email", "charset", "version",
+        "html_type", "text_direction", "language", "stylesheet_url", "stylesheet_directory",
+        "template_url", "template_directory", "pingback_url", "atom_url", "rdf_url",
+        "rss_url", "rss2_url", "comments_atom_url", "comments_rss2_url", "siteurl", "home"
+    ];
 
 
 
@@ -104,7 +111,9 @@ class ThemeBuilder
         foreach ($data as $path) {
 
             if (!file_exists($path)) {
-                __resp_wp_notice(sprintf(__( "File not Found \"%s\"", RESP_TEXT_DOMAIN) , $path ) , "error");
+                com::notice(sprintf(
+                     /* translators: %s is replaced with "string" */
+                    esc_html__( "File not Found \"%s\"", "resp") , $path ) , "error");
                 continue;
             }
 
@@ -122,9 +131,11 @@ class ThemeBuilder
         if (isset($key)) {
 
             return __resp_array_item(self::$staticData, $key, []);
+
         } else {
 
             return self::$staticData;
+            
         }
     }
 
@@ -226,17 +237,17 @@ class ThemeBuilder
             $default_config = get_template_directory() . "/config.json";
 
             if (file_exists($default_config)) {
-/*
-                Communicator::info(sprintf(
-                    __("Default configuration is loaded. You can edit it <a href=\"%s\">here</a>.", RESP_TEXT_DOMAIN),
+                /*
+                com::info(sprintf(
+                    esc_html__("Default configuration is loaded. You can edit it <a href=\"%s\">here</a>.", "resp"),
                     menu_page_url(RESP_OPTION_GROUP, false) . "&tab=edit"
                 ));
-*/
+                */
                 return file_get_contents($default_config);
 
             } else {
 
-                Communicator::critical(__("Unable to find \"config.json\".", RESP_TEXT_DOMAIN));
+                com::critical(esc_html__("Unable to find \"config.json\".", "resp"));
 
             }
         } else {
@@ -249,7 +260,7 @@ class ThemeBuilder
         }
 
         if ($json == null || $data == null) {
-            __resp_wp_notice(__("Unable to parse the configuration.", RESP_TEXT_DOMAIN), "error");
+            com::notice(esc_html__("Unable to parse data.", "resp"), "error");
             return $option;
         }
 
@@ -270,15 +281,22 @@ class ThemeBuilder
      */
     static function replaceBlogInfo(&$text){
 
-        $blogParams =  [
-            "name", "description", "wpurl", "url", "admin_email", "charset", "version",
-            "html_type", "text_direction", "language", "stylesheet_url", "stylesheet_directory",
-            "template_url", "template_directory", "pingback_url", "atom_url", "rdf_url",
-            "rss_url", "rss2_url", "comments_atom_url", "comments_rss2_url", "siteurl", "home"
-        ];
-       
-        foreach($blogParams as $info){
-            $text = str_replace("@blog:$info" , get_bloginfo( $info ) , $text );
+        if(!is_string($text)){
+           return;
+        }
+
+        if(empty($text)){
+            return;
+        }
+
+        foreach(self::BLOG_INFO_PARAMS as $info){
+
+            $keyword = "@blog:$info";
+
+            if(strpos($text , $keyword) > -1){
+                $text = str_replace($keyword , get_bloginfo( $info ) , $text );
+            }
+
         }
         
     }

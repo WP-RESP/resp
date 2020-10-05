@@ -2,7 +2,7 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 use Resp\Core, Resp\Tag;
@@ -28,7 +28,7 @@ Core::tag("input", "searchform-input", null, [
     "id" => "s",
     "name" => "s",
     "type" => "text",
-    "placeholder" => Core::text(__("Search...", RESP_TEXT_DOMAIN), "searchform-placeholder", false)
+    "placeholder" => Core::text(esc_html__("Search...", "resp"), "searchform-placeholder", false)
 ])->e();
 
 Core::trigger("searchform-after-input", true);
@@ -37,7 +37,7 @@ Core::tag("button", "searchform-submit", "", [
    "attr" => [ "type" => "submit"]
 ])->render(true, false);
 
-Core::text(__("Go", RESP_TEXT_DOMAIN), "searchform-submit");
+Core::text(esc_html__("Go", "resp"), "searchform-submit");
 
 Core::trigger("searchform-after-submit", true);
 

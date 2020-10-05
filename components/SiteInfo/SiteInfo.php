@@ -2,22 +2,18 @@
 
 /**
  * Licensed under Apache 2.0 (https://github.com/WP-RESP/resp/blob/master/LICENSE)
- * Copyright (C) 2019 Arman Afzal <rmanaf.com>
+ * Copyright (C) 2019 WP-RESP (https://wp-resp.com)
  */
 
 namespace Resp\Components;
 
-use  Resp\Component;
+use Resp\Component;
+use Resp\ThemeBuilder;
+
+defined('RESP_VERSION') or die;
 
 class SiteInfo extends Component
 {
-
-    private static $blog_info =  [
-        "name", "description", "wpurl", "url", "admin_email", "charset", "version",
-        "html_type", "text_direction", "language", "stylesheet_url", "stylesheet_directory",
-        "template_url", "template_directory", "pingback_url", "atom_url", "rdf_url",
-        "rss_url", "rss2_url", "comments_atom_url", "comments_rss2_url", "siteurl", "home"
-    ];
 
     function __construct()
     {
@@ -56,7 +52,7 @@ class SiteInfo extends Component
             return;
         }
 
-        if (in_array($names[0], self::$blog_info)) {
+        if (in_array($names[0], ThemeBuilder::BLOG_INFO_PARAMS)) {
             return get_bloginfo($names[0]);
         }
 
