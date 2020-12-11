@@ -55,7 +55,7 @@ class ThemeOptions
     }
 
     /**
-     * @since 0.9.2
+     * @since 0.9.3
      */
     static function editTabSubMenus(){
         

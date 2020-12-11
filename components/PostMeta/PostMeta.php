@@ -407,7 +407,7 @@ class PostMeta extends Component
     }
 
     /**
-     * @since 0.9.2
+     * @since 0.9.3
      */
     static function replacePostParams($output)
     {
@@ -418,11 +418,14 @@ class PostMeta extends Component
             return $output;
         }
 
-        foreach (array_merge(self::$post_data, ["permalink"]) as $param) {
+        foreach (array_merge(self::$post_data, ["id", "permalink"]) as $param) {
 
             $keyword = "@post:$param";
 
             switch ($param) {
+                case "id":
+                    $value = $post->ID;
+                    break;
                 case "permalink":
                     $value = get_permalink($post->ID);
                     break;

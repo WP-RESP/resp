@@ -154,6 +154,9 @@ class Classifier extends Component
         return ["class" => $class, "role" => $role];
     }
 
+    /**
+     * @since 0.9.3
+     */
     private static function mergeState(&$class_filters , $role , $state , $gbClass , $smClass , $page_namespace){
 
         if(!empty($state)){

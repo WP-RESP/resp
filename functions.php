@@ -210,7 +210,7 @@ function __resp_register_parser($tag, $shortcode, $callback)
 }
 
 /**
- * @since 0.9.2
+ * @since 0.9.3
  */
 function __resp_esc_state($value)
 {
@@ -218,7 +218,7 @@ function __resp_esc_state($value)
 }
 
 /**
- * @since 0.9.2
+ * @since 0.9.3
  */
 function __resp_get_states()
 {

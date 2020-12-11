@@ -17,7 +17,7 @@ class ThemeOptionWrapper
     static $actionPrefix = "resp-admin--wrapper-form";
 
     /**
-     * @since 0.9.2
+     * @since 0.9.3
      */
     static function createSubMenuTab($icon, $title, $target, $echo = true)
     {

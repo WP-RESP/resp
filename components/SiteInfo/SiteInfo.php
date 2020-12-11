@@ -73,7 +73,7 @@ class SiteInfo extends Component
     }
 
     /**
-     * @since 0.9.2
+     * @since 0.9.3
      */
     static function checkInfoParams($output)
     {
@@ -82,7 +82,7 @@ class SiteInfo extends Component
     }
 
     /**
-     * @since 0.9.2
+     * @since 0.9.3
      */
     static function replaceBlogInfo(&$text)
     {
@@ -109,7 +109,7 @@ class SiteInfo extends Component
     }
 
     /**
-     * @since 0.9.2
+     * @since 0.9.3
      */
     private static function checkForEscURL($param, &$value)
     {

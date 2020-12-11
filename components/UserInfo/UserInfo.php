@@ -22,7 +22,7 @@ class UserInfo extends Component
     }
 
     /**
-     * @since 0.9.2
+     * @since 0.9.3
      */
     static function checkInfoParams($output)
     {
@@ -53,7 +53,7 @@ class UserInfo extends Component
     }
 
     /**
-     * @since 0.9.2
+     * @since 0.9.3
      */
     private static function getUserInfo($user, $info, $meta)
     {
