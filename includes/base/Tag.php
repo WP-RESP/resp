@@ -218,7 +218,9 @@ class Tag
 
         $attr = $this->get("attr");
 
-        $attr["id"] = $this->get("id");
+        if(!isset($attr["id"])){
+            $attr["id"] = $this->get("id");
+        }
 
         $class_inline = is_array($class) ? implode(" ", $class) : $class;
 
@@ -249,12 +251,15 @@ class Tag
             $attr["style"] = $styles;
         }
 
-
-
         $attr = array_filter($attr, function ($item) {
-
             return !empty($item);
         });
+
+        foreach ($attr as $key => $value) {
+            if (is_scalar($value) && '' !== $value && false !== $value) {
+                $attr[$key] = ('href' === $key) ? esc_url($value) : esc_attr($value);
+            }
+        }
 
         return $attr;
     }

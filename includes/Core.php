@@ -422,13 +422,33 @@ class Core
     static function doAction($hook, $meta = null)
     {
 
+        $states = __resp_get_states();
+
         if (current_user_can("update_core") && self::option("resp_development_mode")) {
-            Tag::comment($hook);
+            
+            foreach($states as $state){
+
+                if(!empty($state)){
+                    $state = ":$state";
+                }
+
+                Tag::comment("{$hook}{$state}");
+            }
+
         }
 
-        do_action($hook, $meta);
+        foreach($states as $state){
 
-        echo apply_filters("$hook-value", "");
+            if(!empty($state)){
+                $state = ":$state";
+            }
+
+            do_action("{$hook}{$state}", $meta);
+
+            echo apply_filters("{$hook}{$state}-value", "");
+
+        }
+
     }
 
 

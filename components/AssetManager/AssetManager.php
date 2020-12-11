@@ -9,6 +9,7 @@ namespace Resp\Components;
 
 use Resp\DOMHandlers;
 use Resp\Tag, Resp\Component, Resp\FileManager as fm, Resp\ThemeBuilder as tb;
+use Resp\ThemeOptionWrapper;
 
 defined('RESP_VERSION') or die;
 
@@ -21,12 +22,12 @@ class AssetManager extends Component
 
     const VIEW_FILE_EXTENSION = "html";
 
-    const CONFIG_VERSION_PARAMS = ["v" , "ver" , "version"];
+    const CONFIG_VERSION_PARAMS = ["v", "ver", "version"];
 
-    const CONFIG_MEDIA_PARAMS = ["m" , "media"];
+    const CONFIG_MEDIA_PARAMS = ["m", "media"];
 
-    const CONFIG_DEPENDENCIES_PARAMS =  ["d" , "deps" , "dependency" , "dependencies"];
-    
+    const CONFIG_DEPENDENCIES_PARAMS =  ["d", "deps", "dependency", "dependencies"];
+
 
 
     private static $styles = [];
@@ -36,6 +37,11 @@ class AssetManager extends Component
 
     function __construct()
     {
+        $class = get_called_class();
+
+        //add_action("resp-settings-after-content_edit", "$class::renderAssetsSection");
+        //add_action("resp-admin--submenu-tabs_edit", "$class::renderAssetsTab");
+
         add_action("resp-themebuilder-build", [$this, "extractPackages"]);
         add_action("resp-themebuilder-build", [$this, "extractPaths"]);
         add_action("wp_enqueue_scripts", [$this, "registerPackages"]);
@@ -48,30 +54,26 @@ class AssetManager extends Component
     /**
      * @since 0.9.0
      */
-    function extractPaths(){
+    function extractPaths()
+    {
 
-        foreach(array_merge( 
+        foreach (array_merge(
             tb::getData(self::PATHS_DEF_NAME),
             tb::getExternalData(self::PATHS_DEF_NAME)
-        ) as $key => $value){
+        ) as $key => $value) {
 
-            if($key !== "$" || !__resp_str_startsWith( $key , "@")){
+            if ($key !== "$" || !__resp_str_startsWith($key, "@")) {
                 continue;
             }
 
-            if(is_string($value))
-            {
-                
-                fm::definePath($key , $value);
+            if (is_string($value)) {
 
-            } else if(isset($value["path"])) {
+                fm::definePath($key, $value);
+            } else if (isset($value["path"])) {
 
-                fm::definePath($key , $value["path"] , __resp_array_item($value , "fallback" , null));
-
+                fm::definePath($key, $value["path"], __resp_array_item($value, "fallback", null));
             }
-
         }
-
     }
 
 
@@ -81,7 +83,7 @@ class AssetManager extends Component
      */
     function extractPackages()
     {
-        $data = array_merge_recursive( 
+        $data = array_merge_recursive(
             tb::getData(self::PACKAGES_DEF_NAME),
             tb::getExternalData(self::PACKAGES_DEF_NAME)
         );
@@ -124,7 +126,7 @@ class AssetManager extends Component
     }
 
 
-    
+
 
 
 
@@ -188,9 +190,9 @@ class AssetManager extends Component
 
             $src = "";
 
-            if(is_string($value)){
+            if (is_string($value)) {
                 $src = $value;
-            } else if(is_array($value)) {
+            } else if (is_array($value)) {
                 $src = __resp_array_item($value, "src", "");
             }
 
@@ -198,7 +200,7 @@ class AssetManager extends Component
                 continue;
             }
 
-            if(is_array($src)){
+            if (is_array($src)) {
                 $src = $src[0];
             }
 
@@ -210,16 +212,16 @@ class AssetManager extends Component
                 wp_deregister_style($key);
             }
 
-            fm::fixUndefinedExtension($src , "css");
+            fm::fixUndefinedExtension($src, "css");
 
             self::checkFileURI($src);
 
             wp_enqueue_style(
                 $key,
                 $src,
-                __resp_array_item($value , self::CONFIG_DEPENDENCIES_PARAMS , []),
-                __resp_array_item($value , self::CONFIG_VERSION_PARAMS , tb::getVersion()),
-                __resp_array_item($value , self::CONFIG_MEDIA_PARAMS , "all")
+                __resp_array_item($value, self::CONFIG_DEPENDENCIES_PARAMS, []),
+                __resp_array_item($value, self::CONFIG_VERSION_PARAMS, tb::getVersion()),
+                __resp_array_item($value, self::CONFIG_MEDIA_PARAMS, "all")
             );
         }
     }
@@ -234,9 +236,9 @@ class AssetManager extends Component
 
             $src = "";
 
-            if(is_string($value)){
+            if (is_string($value)) {
                 $src = $value;
-            } else if(is_array($value)) {
+            } else if (is_array($value)) {
                 $src = __resp_array_item($value, "src", "");
             }
 
@@ -244,7 +246,7 @@ class AssetManager extends Component
                 continue;
             }
 
-            if(is_array($src)){
+            if (is_array($src)) {
                 $src = $src[0];
             }
 
@@ -256,16 +258,16 @@ class AssetManager extends Component
                 wp_deregister_script($key);
             }
 
-            fm::fixUndefinedExtension($src , "js");
+            fm::fixUndefinedExtension($src, "js");
 
             self::checkFileURI($src);
 
             wp_enqueue_script(
                 $key,
                 $src,
-                __resp_array_item($value , self::CONFIG_DEPENDENCIES_PARAMS , []),
-                __resp_array_item($value , self::CONFIG_VERSION_PARAMS , tb::getVersion()),
-                __resp_array_item($value , "in_footer" , false)
+                __resp_array_item($value, self::CONFIG_DEPENDENCIES_PARAMS, []),
+                __resp_array_item($value, self::CONFIG_VERSION_PARAMS, tb::getVersion()),
+                __resp_array_item($value, "in_footer", false)
             );
         }
     }
@@ -308,7 +310,7 @@ class AssetManager extends Component
             "alt" => __resp_array_item($atts, "alt", "")
         ];
 
-        DOMHandlers::getJsonAttributes($attributes , $content);
+        DOMHandlers::getJsonAttributes($attributes, $content);
 
         if ($image) {
             return \Resp\Tag::img($src, $attributes)->render(false);
@@ -335,36 +337,57 @@ class AssetManager extends Component
         tb::chkForPartials($path);
 
 
-        if(!__resp_str_startsWith($path , "@templates/")){
-            $path = "@templates/" . ltrim($path , "\/");
+        if (!__resp_str_startsWith($path, "@templates/")) {
+            $path = "@templates/" . ltrim($path, "\/");
         }
 
 
         fm::fixUndefinedExtension($path, self::VIEW_FILE_EXTENSION);
 
-        fm::useDefinedPaths($path , true);
+        fm::useDefinedPaths($path, true);
 
-        
+
 
         $info = pathinfo($path);
 
 
 
-        if(!in_array($info["extension"] , ["html" , "htm" , "temp" , "tmp"] )){
+        if (!in_array($info["extension"], ["html", "htm", "temp", "tmp"])) {
             return Tag::code("Invalid file extension \"$path\"")->render();
         }
 
 
-        if(!file_exists($path)){
+        if (!file_exists($path)) {
             return Tag::code("File not Found \"$path\"")->render();
         }
 
         $temp = file_get_contents($path);
 
         return do_shortcode($temp, false);
+    }
 
-        
+    /**
+     * @since 0.9.3
+     */
+    static function renderAssetsSection()
+    {
+        ThemeOptionWrapper::renderForm(
+            "Assets",
+            "",
+            function () { },
+            ["class" => "tab-content resp-card", "id" => "assets"]
+        );
+    }
 
-
+    /**
+     * @since 0.9.3
+     */
+    static function renderAssetsTab()
+    {
+        ThemeOptionWrapper::createSubMenuTab(
+            "box",
+            esc_html__("Assets", "resp"),
+            "assets"
+        );
     }
 }

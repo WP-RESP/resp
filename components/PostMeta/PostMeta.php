@@ -28,6 +28,11 @@ class PostMeta extends Component
 
     function __construct()
     {
+
+        $class = get_called_class();
+
+        add_filter("resp-core--config-output", "$class::replacePostParams");
+
         add_shortcode('resp-meta', [$this, 'metaShortcode']);
         add_shortcode('resp-date', [$this, 'dateShortcode']);
 
@@ -60,7 +65,7 @@ class PostMeta extends Component
             "ignore_html" => false
         ], $atts));
 
-        DOMHandlers::getJsonAttributes($atts , $content);
+        DOMHandlers::getJsonAttributes($atts, $content);
 
         if (empty($name)) {
 
@@ -113,17 +118,16 @@ class PostMeta extends Component
             }
 
             return;
-
         }
 
         if ($name === "taxonomy") {
-            if(isset($atts["terms"])){
-                return self::getTerms($id, $atts["terms"] , $atts);
+            if (isset($atts["terms"])) {
+                return self::getTerms($id, $atts["terms"], $atts);
             }
         }
 
-        if (__resp_str_startsWith($name , "@author:") && !is_null($post) ) {
-            return get_the_author_meta( str_replace("@author:" , "" , $name) , $post->post_author);
+        if (__resp_str_startsWith($name, "@author:") && !is_null($post)) {
+            return get_the_author_meta(str_replace("@author:", "", $name), $post->post_author);
         }
 
         if ($name === "excerpt") {
@@ -163,7 +167,7 @@ class PostMeta extends Component
         return $result;
     }
 
-    
+
     /**
      * @since 0.9.0
      */
@@ -177,7 +181,7 @@ class PostMeta extends Component
             "taxonomy" => "category"
         ], $atts));
 
-        if(empty(self::$next_post)){
+        if (empty(self::$next_post)) {
             self::$next_post = get_next_post($in_same_term, $excluded_terms, $taxonomy);
         }
 
@@ -211,7 +215,7 @@ class PostMeta extends Component
         ], $atts));
 
 
-        if(empty(self::$prev_post)){
+        if (empty(self::$prev_post)) {
             self::$prev_post = get_previous_post($in_same_term, $excluded_terms, $taxonomy);
         }
 
@@ -259,7 +263,8 @@ class PostMeta extends Component
     /**
      * @since 0.9.0
      */
-    private static function getTerms($id , $term , $atts){
+    private static function getTerms($id, $term, $atts)
+    {
 
         extract(shortcode_atts([
             "container" => "ul",
@@ -270,7 +275,7 @@ class PostMeta extends Component
             "include_children" => true
         ], $atts));
 
-        $terms = wp_get_post_terms( $id, $term);
+        $terms = wp_get_post_terms($id, $term);
 
 
         if (!$terms) {
@@ -326,7 +331,6 @@ class PostMeta extends Component
         }
 
         return ob_get_clean();
-
     }
 
 
@@ -400,5 +404,39 @@ class PostMeta extends Component
         }
 
         return ob_get_clean();
+    }
+
+    /**
+     * @since 0.9.2
+     */
+    static function replacePostParams($output)
+    {
+
+        global $post;
+
+        if (!isset($post)) {
+            return $output;
+        }
+
+        foreach (array_merge(self::$post_data, ["permalink"]) as $param) {
+
+            $keyword = "@post:$param";
+
+            switch ($param) {
+                case "permalink":
+                    $value = get_permalink($post->ID);
+                    break;
+                default:
+                    $value = $post->$param;
+            }
+
+            if (in_array($param, ["guid", "permalink"])) {
+                $value = esc_url($value);
+            }
+
+            $output = str_replace($keyword, $value, $output);
+        }
+
+        return $output;
     }
 }

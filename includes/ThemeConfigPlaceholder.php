@@ -17,23 +17,23 @@ class ThemeConfigPlaceholder
     /**
      * @since 0.9.0
      */
-    static function registerForm($title, $description, $hidden = false, $action = null, $wrapper = true)
+    static function registerForm($title, $description, $hidden = false, $action = null, $wrapper = true , $attr = [])
     {
 
-        $class = "\Resp\ThemeConfigPlaceholder";
+        $class = get_called_class(); //"\Resp\ThemeConfigPlaceholder";
 
         $callback = $hidden ? "$class::hiddenPlaceholderHandler" : "$class::placeholderHandler";
 
         if (is_null($action)) {
             if ($wrapper) {
-                tow::renderForm($title, $description,  $callback);
+                tow::renderForm($title, $description,  $callback , $attr);
             } else {
                 call_user_func($callback);
             }
         } else {
-            add_action($action, function () use ($title, $description,  $callback, $wrapper) {
+            add_action($action, function () use ($title, $description,  $callback, $wrapper , $attr) {
                 if ($wrapper) {
-                    tow::renderForm($title, $description, $callback);
+                    tow::renderForm($title, $description, $callback , $attr);
                 } else {
                     call_user_func($callback);
                 }

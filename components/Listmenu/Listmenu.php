@@ -8,6 +8,7 @@
 namespace Resp\Components;
 
 use Resp\Component, Resp\ThemeBuilder, Resp\Tag;
+use Resp\RespWalkerNavMenu;
 
 defined('RESP_VERSION') or die;
 
@@ -298,7 +299,7 @@ class ListMenu extends Component
             'link_before' => $link_before,
             'link_after' => $link_after,
             'depth' => $depth,
-            'walker' => $walker,
+            'walker' => new RespWalkerNavMenu,
             'theme_location' => $theme_location
         ));
 

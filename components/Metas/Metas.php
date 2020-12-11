@@ -73,9 +73,7 @@ class Metas extends Component
 
             array_walk($param , function(&$item , $key) { 
 
-                tb::replaceBlogInfo($item);
-                
-                tb::replacePostParams($item);
+                $item = apply_filters("resp-core--config-output" , $item);
                 
             });
 

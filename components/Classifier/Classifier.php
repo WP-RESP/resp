@@ -7,7 +7,7 @@
 
 namespace Resp\Components;
 
-use Resp\Component, Resp\FileManager, Resp\ThemeBuilder as tb, Resp\Core;
+use Resp\Component, Resp\ThemeBuilder as tb, Resp\Core;
 
 defined('RESP_VERSION') or die;
 
@@ -29,16 +29,19 @@ class Classifier extends Component
 
     function __construct()
     {
-        add_action("resp-themebuilder-build", [$this, "extractClasses"], 10);
-        add_filter("resp-core--tag-attributes", [$this, "filterAttributes"], 10, 1);
-        add_filter("resp-core--tag-classes", [$this, "filterClasses"], 10, 1);
+
+        $class = get_called_class();
+
+        add_action("resp-themebuilder-build", "$class::extractClasses", 10);
+        add_filter("resp-core--tag-attributes", "$class::filterAttributes", 10, 1);
+        add_filter("resp-core--tag-classes", "$class::filterClasses", 10, 1);
     }
 
 
     /**
      * @since 0.9.0
      */
-    function localizeAliases()
+    static function localizeAliases()
     {
 
         if (empty(self::$aliases)) {
@@ -58,7 +61,7 @@ class Classifier extends Component
     /**
      * @since 0.9.0
      */
-    function extractClasses()
+    static function extractClasses()
     {
 
         $data = tb::getDefinitions(self::CLASSES_DEf_NAME);
@@ -101,19 +104,14 @@ class Classifier extends Component
             });
         }
 
-
-        $this->localizeAliases();
+        self::localizeAliases();
     }
-
-
-
-
 
 
     /**
      * @since 0.9.0
      */
-    function filterClasses($data)
+    static function filterClasses($data)
     {
 
         global $page_namespace, $section_prefix;
@@ -139,10 +137,14 @@ class Classifier extends Component
             $class = $data["class"];
         }
 
-        $class_filters = __resp_array_merge(["$gbClass-classes", "$page_namespace--$role-classes"], (empty($section_prefix) ? [] : ["$smClass-classes"]));
+        array_walk($class, function(&$item){
+            $item = __resp_esc_state($item);
+        });
 
-        if (in_array($role, self::SPECIAL_TAGS)) {
-            $class_filters[] = "$role-classes";
+        $class_filters = [];
+
+        foreach(__resp_get_states() as $state){
+            self::mergeState($class_filters , $role , $state , $gbClass , $smClass , $page_namespace );
         }
 
         foreach ($class_filters as $filter) {
@@ -152,12 +154,28 @@ class Classifier extends Component
         return ["class" => $class, "role" => $role];
     }
 
+    private static function mergeState(&$class_filters , $role , $state , $gbClass , $smClass , $page_namespace){
+
+        if(!empty($state)){
+            $state = ":$state";
+        }
+
+        $class_filters = __resp_array_merge($class_filters, [
+            "{$gbClass}{$state}-classes", 
+            "$page_namespace--{$role}{$state}-classes"
+        ], (empty($section_prefix) ? [] : ["$smClass{$state}-classes"]));
+
+        if (in_array($role, self::SPECIAL_TAGS)) {
+            $class_filters[] = "$role{$state}-classes";
+        }
+
+    }
 
 
     /**
      * @since 0.9.0
      */
-    function filterAttributes($data)
+    static function filterAttributes($data)
     {
 
         global $page_namespace, $section_prefix;

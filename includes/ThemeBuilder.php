@@ -22,13 +22,7 @@ class ThemeBuilder
 
     const CONFIG_FILE_EXTENSION = "json";
 
-    const BLOG_INFO_PARAMS =  [
-        "name", "description", "wpurl", "url", "admin_email", "charset", "version",
-        "html_type", "text_direction", "language", "stylesheet_url", "stylesheet_directory",
-        "template_url", "template_directory", "pingback_url", "atom_url", "rdf_url",
-        "rss_url", "rss2_url", "comments_atom_url", "comments_rss2_url", "siteurl", "home"
-    ];
-
+    
 
 
     private static $data = [];
@@ -276,56 +270,6 @@ class ThemeBuilder
     }
 
     
-    /**
-     * @since 0.9.1
-     */
-    static function replaceBlogInfo(&$text){
-
-        if(!is_string($text)){
-           return;
-        }
-
-        if(empty($text)){
-            return;
-        }
-
-        foreach(self::BLOG_INFO_PARAMS as $info){
-
-            $keyword = "@blog:$info";
-
-            if(strpos($text , $keyword) > -1){
-                $text = str_replace($keyword , get_bloginfo( $info ) , $text );
-            }
-
-        }
-        
-    }
-
-    /**
-     * @since 0.9.1
-     */
-    static function replacePostParams(&$text){
-
-        global $post;
-
-        if(!isset($post)){
-            return;
-        }
-
-        $postParams =  [
-            "ID", "post_author", "post_name", "post_type", "post_title", "post_date", "post_date_gmt",
-            "post_content", "post_excerpt", "post_status", "comment_status", "ping_status",
-            "post_password", "post_parent", "post_parent", "post_modified", "post_modified_gmt",
-            "comment_count", "menu_order", "guid"
-        ];
-
-        foreach($postParams as $param){
-            $text = str_replace("@post:$param" , $post->$param , $text );
-        }
-
-    }
-
-
     /**
      * @since 0.9.0
      */

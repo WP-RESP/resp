@@ -102,17 +102,17 @@ if (!$is_front_page) {
 
     Tag::close("article");
 
+    Core::trigger("after-content", true);
+
     if (comments_open() || get_comments_number()) {
 
-        $noCOmments = __resp_tp("no-comments" , false);
+        $noComments = __resp_tp("no-comments" , false);
 
-        if(!$noCOmments){
+        if(!$noComments){
             comments_template();
         }
         
     }
-
-    Core::trigger("after-content", true);
 
     // closing the container
     Tag::close("div");

@@ -19,43 +19,42 @@ function __resp_init()
     define("RESP_VERSION", "0.9.2");
 
     foreach ([
-        "base/DOMHandlers" ,
-        "base/FileManager" , 
-        "base/Tag", 
-        "base/Component",  
-        "ThemeBuilder", 
+        "base/DOMHandlers",
+        "base/FileManager",
+        "base/Tag",
+        "base/Component",
+        "ThemeBuilder",
+        "walkers/RespWalkerNavMenu",
         "walkers/RespWalkerComment",
         "ConstantLoader",
         "AdvancedSettings",
         "ThemeOptionWrapper",
         "ThemeConfigPlaceholder",
-        "ThemeOptions", 
+        "ThemeOptions",
         "Communicator",
         "Core"
-        ] as $source) {
-            $path = __DIR__ .  "/includes/{$source}.php";
+    ] as $source) {
+        $path = __DIR__ .  "/includes/{$source}.php";
 
-            if(file_exists($path)){
-                require_once $path;
-            }
-            
+        if (file_exists($path)) {
+            require_once $path;
+        }
     }
 
     \Resp\Core::run();
-
 }
 
 
-function __resp_array_merge(...$array){
+function __resp_array_merge(...$array)
+{
 
     $result = [];
 
-    foreach($array as $a){
-        $result = array_merge($result , $a);
+    foreach ($array as $a) {
+        $result = array_merge($result, $a);
     }
 
     return $result;
-
 }
 
 
@@ -77,16 +76,14 @@ function __resp_array_item($array, $item, $default = null)
         return $default;
     }
 
-    if(!is_array($item))
-    {
+    if (!is_array($item)) {
         $item = [$item];
     }
 
     $result = $default;
 
-    foreach($item as $i){
-        if(isset($array[$i]))
-        {
+    foreach ($item as $i) {
+        if (isset($array[$i])) {
             $result = $array[$i];
         }
     }
@@ -158,11 +155,11 @@ function __resp_master_sidebar_disabled($name)
 {
     global $page_namespace;
 
-    $nosidebar = isset($_REQUEST['no{$name}']) || __resp_tp("no-{$name}" , false);
+    $nosidebar = isset($_REQUEST['no{$name}']) || __resp_tp("no-{$name}", false);
 
-    $nomaster = isset($_REQUEST['nomaster']) || __resp_tp("no-master" , false);
+    $nomaster = isset($_REQUEST['nomaster']) || __resp_tp("no-master", false);
 
-    return apply_filters( "resp--master-sidebar-disabled" , $nomaster || $nosidebar );
+    return apply_filters("resp--master-sidebar-disabled", $nomaster || $nosidebar);
 }
 
 
@@ -180,9 +177,9 @@ function __resp_error($message)
 /**
  * @since 0.9.0
  */
-function __resp_tp($name , $default)
+function __resp_tp($name, $default)
 {
-    return \Resp\Core::getThemeParameter($name , $default);
+    return \Resp\Core::getThemeParameter($name, $default);
 }
 
 
@@ -191,15 +188,16 @@ function __resp_tp($name , $default)
  */
 function __resp_wp_notice($message, $type = "info", $dismissible = true)
 {
-    \Resp\Communicator::notice($message , $type , $dismissible);
+    \Resp\Communicator::notice($message, $type, $dismissible);
 }
 
 /**
  * @since 0.9.2
  */
-function __resp_register_parser($tag , $shortcode , $callback ){
+function __resp_register_parser($tag, $shortcode, $callback)
+{
 
-    add_filter( "resp-core--parsers" , function($parsers) use ($tag , $shortcode , $callback ){
+    add_filter("resp-core--parsers", function ($parsers) use ($tag, $shortcode, $callback) {
 
         $parsers[] = [
             "tag" => $tag,
@@ -208,8 +206,32 @@ function __resp_register_parser($tag , $shortcode , $callback ){
         ];
 
         return $parsers;
+    });
+}
 
-    } );
+/**
+ * @since 0.9.2
+ */
+function __resp_esc_state($value)
+{
+    return explode(":", $value)[0];
+}
+
+/**
+ * @since 0.9.2
+ */
+function __resp_get_states()
+{
+    $states =  [""];
+    if (is_user_logged_in()) {
+        $states[] = "member";
+    } else {
+        $states[] = "anonymous";
+    }
+    if (current_user_can("administrator")) {
+        $states[] = "admin";
+    }
+    return $states;
 }
 
 __resp_init();

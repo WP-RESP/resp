@@ -7,7 +7,10 @@
 
 namespace Resp\Components;
 
-use \Resp\Component, \Resp\Core, \Resp\ThemeOptionWrapper as tow;
+use Resp\Component,
+    Resp\Core,
+    Resp\ThemeOptionWrapper as tow,
+    Resp\Tag;
 
 defined('RESP_VERSION') or die;
 
@@ -20,6 +23,8 @@ class ExtraScript extends Component
     function __construct()
     {
 
+        $class = get_called_class();
+
         // Loads default script from the file
         self::$default_scripts = file_get_contents(__DIR__ . "/assets/default.js");
 
@@ -27,15 +32,26 @@ class ExtraScript extends Component
 
         add_action("resp-settings-after-content_edit", [$this, 'scriptEditorSection']);
 
+        add_action("resp-admin--submenu-tabs_edit", "$class::renderScriptTab");
+
         add_action("resp-admin--editor",  [$this, "addJavascriptEditorOptions"], 10, 1);
 
         if (Core::option("resp_no_jquery")) {
             add_action("wp_enqueue_scripts", [$this, "deregisterJquery"], 10);
-        } else if (!Core::isUnderConstructionPage()) {
+        }
+
+        if (!Core::isUnderConstructionPage()) {
             add_action('wp_enqueue_scripts', [$this,  "appendScript"]);
         }
     }
 
+    /**
+     * @since 0.9.2
+     */
+    static function renderScriptTab()
+    {
+        tow::createSubMenuTab("code" , esc_html__("Script", "resp") , "script");
+    }
 
 
     /**
@@ -81,10 +97,11 @@ class ExtraScript extends Component
             "Script",
             "The following code will be added to the document footer.",
             function () use ($script) {
-                \Resp\Tag::textareaFor("resp_script", wp_check_invalid_utf8($script) , ["rows" => 15])
+                \Resp\Tag::textareaFor("resp_script", wp_check_invalid_utf8($script), ["rows" => 15])
                     ->addClass("large-text code")
                     ->e();
-            }
+            },
+            ["class" => "tab-content resp-card" , "id" => "script"]
         );
     }
 
@@ -99,8 +116,6 @@ class ExtraScript extends Component
         wp_deregister_script("jquery");
     }
 
-
-
     /**
      * @since 0.9.0
      */
@@ -113,6 +128,6 @@ class ExtraScript extends Component
             $script = self::$default_scripts;
         }
 
-        wp_add_inline_script("resp", $script);
+        wp_add_inline_script("resp", apply_filters("resp-core--config-output", $script));
     }
 }

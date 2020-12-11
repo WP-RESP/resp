@@ -141,12 +141,12 @@ class ThemeValues extends Component
     function customizeRegister($wp_customize)
     {
 
-        $data = array_merge_recursive( 
+        $data = array_merge_recursive(
             tb::getDefinitions(self::VALUES_DEF_NAME),
             tb::getStatics(self::VALUES_DEF_NAME)
         );
 
-        $exclude = __resp_array_item($data , "exclude" , []);
+        $exclude = __resp_array_item($data, "exclude", []);
 
         $sections = __resp_array_item($data, "sections", []);
 
@@ -181,7 +181,7 @@ class ThemeValues extends Component
                 continue;
             }
 
-            if(in_array($key , $exclude)){
+            if (in_array($key, $exclude)) {
                 continue;
             }
 
@@ -199,7 +199,7 @@ class ThemeValues extends Component
             ]);
 
             $args = [
-                'label'     => __resp_array_item($value, "label" , $key),
+                'label'     => __resp_array_item($value, "label", $key),
                 'section'   => $section,
                 'settings'  => $key
             ];
@@ -259,7 +259,10 @@ class ThemeValues extends Component
 
         $staticData = tb::getStatics(self::VALUES_DEF_NAME);
 
-        foreach (array_merge_recursive($data, $staticData) as $key => $value) {
+        $allData = array_merge_recursive($data, $staticData);
+
+
+        foreach ($allData as $key => $value) {
 
             if (in_array($key, self::VALUES_DEF_PROPS)) {
                 continue;
@@ -334,31 +337,25 @@ class ThemeValues extends Component
                     $action = [$action];
                 }
 
-                
-
-                array_walk($action, function (&$actItem, $actName) {
+                array_walk($action, function (&$actItem, $actName) use ($theme_slug) {
                     $actItem = "$actItem-value";
 
-                    if(__resp_str_startsWith($actItem ,"*-"))
-                    {
-                        $slug = tb::getSlug();
-                        $actItem = str_replace("*-" , "$slug-" , $actItem );
+                    if (__resp_str_startsWith($actItem, "*-")) {
+                        $actItem = str_replace("*-", "$theme_slug-", $actItem);
                     }
                 });
 
                 foreach ($action as $a) {
-
                     add_filter($a, function ($old_value) use ($key, $value, $val, $scode) {
-                        
+
                         $val = get_theme_mod($key, $val);
+
                         self::checkContainer($value, $val, $key);
 
                         $val =  $scode ? do_shortcode($val) : $val;
 
                         return $old_value . $val;
-                        
-                    } , (int) __resp_array_item($value , "priority" , 10));
-
+                    }, (int) __resp_array_item($value, "priority", 10));
                 }
             }
 
@@ -367,6 +364,8 @@ class ThemeValues extends Component
             }
         }
     }
+
+
 
 
     /**
@@ -458,17 +457,23 @@ class ThemeValues extends Component
             $value = Tag::img($value, __resp_array_item($mod, "attr", []))
                 ->addClass(__resp_array_item($mod, "class", []))
                 ->render();
-
         } else if (isset($mod["container"]) && !empty($value)) {
+
+            $attr = __resp_array_item($mod, "attr", []);
+
+            if(is_array($attr)){
+                array_walk($attr, function (&$item, $key) {
+                    $item = apply_filters("resp-core--config-output", $item);
+                });
+            }
 
             $value = Tag::create([
                 "name" => $mod["container"],
                 "class" =>  __resp_array_item($mod, "class", []),
                 "id" =>  __resp_array_item($mod, "id",  $id_fallback),
-                "attr" => __resp_array_item($mod, "attr", []),
+                "attr" => $attr,
                 "content" => $value
             ])->render();
-            
         }
     }
 
@@ -479,10 +484,9 @@ class ThemeValues extends Component
     private static function retrieveValue(&$output, $mod_name)
     {
 
-        if(!isset(self::$values[$mod_name]))
-        {
-             /* translators: %s is replaced with "string" */
-            __resp_error(sprintf(esc_html__("Value not defined: %s", "resp"), $mod_name));
+        if (!isset(self::$values[$mod_name])) {
+            /* translators: %s is replaced with "string" */
+            __resp_error(sprintf(esc_html__("Value is not defined: %s", "resp"), $mod_name));
             return;
         }
 
@@ -509,6 +513,8 @@ class ThemeValues extends Component
         if (isset($mod["shortcode"]) && $mod["shortcode"] === true) {
             $output = do_shortcode($output, false);
         }
+
+        $output = apply_filters("resp-core--config-output", $output);
     }
 
 
@@ -593,8 +599,19 @@ class ThemeValues extends Component
 
         $value = null;
 
+        $states = __resp_get_states();
+
+        $realName = __resp_esc_state($name);
+
+
         // get the value
-        self::retrieveValue($value, $name);
+        foreach ($states as $state) {
+            if (!empty($state)) {
+                $state = ":$state";
+            }
+            self::retrieveValue($value, "{$realName}{$state}");
+        }
+
 
         if (empty($value)) {
             return;

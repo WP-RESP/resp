@@ -18,6 +18,17 @@ if (typeof wp !== "undefined" && typeof wp.i18n !== "undefined") {
 
     function init() {
 
+        initAdminClass();
+
+        initCom();
+
+        initSubmenuTabs();
+
+        initDashboard();
+
+    }
+
+    function initAdminClass(){
         window.respAdmin = new RESPAdmin();
 
         window.respAdmin.editors = [{
@@ -28,7 +39,9 @@ if (typeof wp !== "undefined" && typeof wp.i18n !== "undefined") {
             selector: "#resp_script",
             options: d.admin.editor.javascript
         }];
+    }
 
+    function initCom(){
         window.respAdmin.com.ajax = function (wrap, action, callback = null, fail = null, params = {}, method = "GET") {
 
             const nonce = wrap.attr("data-nonce");
@@ -59,7 +72,38 @@ if (typeof wp !== "undefined" && typeof wp.i18n !== "undefined") {
             });
 
         }
+    }
 
+    function initSubmenuTabs() {
+
+        const tabStyle = {
+            "visibility" : "hidden",
+            "position" : "absolute",
+            "pointer-events" : "none"
+        }
+
+        const activeTabStyle = {
+            "visibility" : "visible",
+            "position" : "inherit",
+            "pointer-events" : "all"
+        }
+
+        $('.submenu-nav li').click(function () {
+            const activeTab = $(this).find('a').attr('href');
+
+            $('.submenu-nav li').removeClass('active');
+            $(this).addClass('active');
+
+            $('.tab-content').css(tabStyle);
+            $(activeTab).css(activeTabStyle);
+
+            return false;
+        });
+
+        $('.submenu-nav li:first-child a').trigger("click");
+    }
+
+    function initDashboard(){
         switch (d.admin.tab) {
 
             case "dashboard":
@@ -119,7 +163,6 @@ if (typeof wp !== "undefined" && typeof wp.i18n !== "undefined") {
 
                 break;
         }
-
     }
 
 })(RESP, RESP_DATA, jQuery);

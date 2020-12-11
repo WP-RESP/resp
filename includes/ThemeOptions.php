@@ -30,6 +30,8 @@ class ThemeOptions
 
         self::registerConfigForm();
 
+        add_action('resp-settings-before-content_edit' , "$clazz::editTabSubMenus");
+
         add_action('resp-settings-after-content',  "$clazz::settingsAfterContent");
 
         add_action("resp-settings-after-content_dashboard", "$clazz::renderDashboard");
@@ -52,6 +54,38 @@ class ThemeOptions
         AdvancedSettings::bind();
     }
 
+    /**
+     * @since 0.9.2
+     */
+    static function editTabSubMenus(){
+        
+        Tag::create([
+            "class" => "row my-2",
+        ])->eo();
+        
+        Tag::create([
+            "id" => "resp_submenu-nav",
+            "class" => "col-12 submenu-nav"
+        ])->eo();
+
+        Tag::create([
+            "name" => "ul",
+            "class" => "d-flex tabs list-unstyled py-3 m-0"
+        ])->eo();
+
+        ThemeOptionWrapper::createSubMenuTab(
+            "tool" , 
+            esc_html__("Configuration" , "resp") , 
+            "configuration");
+
+        do_action('resp-admin--submenu-tabs_edit');
+
+        Tag::close("ul");
+
+        Tag::close();
+
+        Tag::close();
+    }
 
     /**
      * @since 0.9.2
@@ -91,7 +125,9 @@ class ThemeOptions
             "Configuration",
             "Backup configuration before making changes.",
             false,
-            "resp-settings-after-content_edit"
+            "resp-settings-after-content_edit",
+            true,
+            ["class" => "tab-content resp-card" , "id" => "configuration"]
         );
     }
 
