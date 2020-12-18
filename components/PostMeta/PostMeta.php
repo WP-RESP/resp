@@ -422,6 +422,10 @@ class PostMeta extends Component
 
             $keyword = "@post:$param";
 
+            if(strpos($output , $keyword) < 0){
+                continue;
+            }
+
             switch ($param) {
                 case "id":
                     $value = $post->ID;

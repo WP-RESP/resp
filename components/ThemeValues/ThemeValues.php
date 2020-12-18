@@ -43,7 +43,11 @@ class ThemeValues extends Component
 
     function __construct()
     {
+        $class = get_called_class();
+
         $limit = 10;
+
+        add_filter("resp-core--config-output" , "$class::replaceValueParams");
 
         add_action("resp-themebuilder-build", [$this, 'extractValues'], 10);
         add_action('customize_register', [$this, 'customizeRegister']);
@@ -552,7 +556,7 @@ class ThemeValues extends Component
         return isset($mod["as"]) && isset($mod["to"]);
     }
 
-
+    
     /**
      * @since 0.9.0
      */
@@ -628,5 +632,19 @@ class ThemeValues extends Component
         self::checkContainer(self::$values[$name], $value, is_customize_preview() ? $name : "");
 
         return $value;
+    }
+
+    /**
+     * @since 0.9.3
+     */
+    static function replaceValueParams($output){
+        foreach(self::$values as $key => $params){
+            $keyword = "@value:$key";
+            if(strpos($output , $keyword) > -1){
+                $value =  do_shortcode("[resp-value name='$key']");
+                $output = str_replace($keyword, $value, $output);
+            }
+        }
+        return $output;
     }
 }

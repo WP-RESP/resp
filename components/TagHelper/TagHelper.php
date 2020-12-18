@@ -138,6 +138,6 @@ class TagHelper extends Component
     
         $result = Tag::create($atts);
 
-        return $result->raw($content)->render();
+        return $result->render();
     }
 }

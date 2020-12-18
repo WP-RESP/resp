@@ -130,6 +130,8 @@ class DOMHandlers
 
         $holder = "resp-attributes";
 
+        $content = apply_filters("resp-core--config-output" , $content);
+
         $doc = self::createDocument($content);
 
         $removeList = [];
@@ -183,5 +185,7 @@ class DOMHandlers
         }
 
         $content = $doc->saveHTML();
+
+        
     }
 }

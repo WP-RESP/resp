@@ -16,7 +16,7 @@ function __resp_init()
 
     define("RESP_MAIN_SERVER", "https://wp-resp.com");
     define("RESP_OPTION_GROUP", "resp");
-    define("RESP_VERSION", "0.9.2");
+    define("RESP_VERSION", "0.9.3");
 
     foreach ([
         "base/DOMHandlers",
