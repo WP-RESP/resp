@@ -78,7 +78,7 @@ class Sidebar extends Component
                 "before_widget", "after_widget", "class"
             ] as $param) {
                 if (isset($value[$param])) {
-                    $args[$param] = $value[$param];
+                    $args[$param] = apply_filters("resp-core--config-output",$value[$param]);
                 }
             }
 
@@ -156,15 +156,12 @@ class Sidebar extends Component
     {
 
         extract(shortcode_atts([
-            'name' => '',
-            'blog' => get_current_blog_id()
+            'name' => ''
         ], $atts));
 
         if (empty($name)) {
             return;
         }
-
-        switch_to_blog($blog);
 
         ob_start();
 
@@ -173,8 +170,6 @@ class Sidebar extends Component
         $sidebar = ob_get_contents();
 
         ob_end_clean();
-
-        restore_current_blog();
 
         return $sidebar;
     }

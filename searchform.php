@@ -26,9 +26,11 @@ Core::trigger("searchform-before-input", true);
 
 Core::tag("input", "searchform-input", null, [
     "id" => "s",
-    "name" => "s",
     "type" => "text",
-    "placeholder" => Core::text(esc_html__("Search...", "resp"), "searchform-placeholder", false)
+    "attr" => [
+        "name" => "s",
+        "placeholder" => Core::text(esc_html__("Search...", "resp"), "searchform-placeholder", false)
+    ]
 ])->e();
 
 Core::trigger("searchform-after-input", true);

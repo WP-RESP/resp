@@ -35,12 +35,7 @@ class Posts extends Component
             return $shortcodes;
         });
 
-        __resp_register_parser( 
-            "resp-posts" ,  
-            "resp-posts-query" , 
-            [$this , "queryShortcode"]
-        );
-
+    
     }
 
     /**

@@ -16,7 +16,7 @@ function __resp_init()
 
     define("RESP_MAIN_SERVER", "https://wp-resp.com");
     define("RESP_OPTION_GROUP", "resp");
-    define("RESP_VERSION", "0.9.3");
+    define("RESP_VERSION", "0.9.4");
 
     foreach ([
         "base/DOMHandlers",
@@ -191,23 +191,6 @@ function __resp_wp_notice($message, $type = "info", $dismissible = true)
     \Resp\Communicator::notice($message, $type, $dismissible);
 }
 
-/**
- * @since 0.9.2
- */
-function __resp_register_parser($tag, $shortcode, $callback)
-{
-
-    add_filter("resp-core--parsers", function ($parsers) use ($tag, $shortcode, $callback) {
-
-        $parsers[] = [
-            "tag" => $tag,
-            "shortcode" => $shortcode,
-            "callback" => $callback
-        ];
-
-        return $parsers;
-    });
-}
 
 /**
  * @since 0.9.3
@@ -216,6 +199,7 @@ function __resp_esc_state($value)
 {
     return explode(":", $value)[0];
 }
+
 
 /**
  * @since 0.9.3
@@ -233,5 +217,6 @@ function __resp_get_states()
     }
     return $states;
 }
+
 
 __resp_init();

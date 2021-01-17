@@ -327,7 +327,7 @@ class ThemeValues extends Component
                 }
             }
 
-
+           
             self::checkContainer($value, $val);
 
 
@@ -350,15 +350,8 @@ class ThemeValues extends Component
                 });
 
                 foreach ($action as $a) {
-                    add_filter($a, function ($old_value) use ($key, $value, $val, $scode) {
-
-                        $val = get_theme_mod($key, $val);
-
-                        self::checkContainer($value, $val, $key);
-
-                        $val =  $scode ? do_shortcode($val) : $val;
-
-                        return $old_value . $val;
+                    add_filter($a, function($old_value) use ($key, $value, $val, $scode) {
+                        return self::printValue($old_value , $key, $value, $val, $scode);
                     }, (int) __resp_array_item($value, "priority", 10));
                 }
             }
@@ -369,6 +362,21 @@ class ThemeValues extends Component
         }
     }
 
+
+    /**
+     * @since 0.9.4
+     */
+    private static function printValue($old_value , $key, $value, $val, $scode){
+
+        $val = get_theme_mod($key, $val);
+
+        self::checkContainer($value, $val, $key);
+
+        $val =  $scode ? do_shortcode($val) : $val;
+
+        return $old_value . $val;
+        
+    }
 
 
 

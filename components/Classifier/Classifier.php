@@ -70,9 +70,12 @@ class Classifier extends Component
 
         $themeSlug = tb::getSlug();
 
+        $isolated = Core::option("resp_isolation");
+
         foreach (array_merge_recursive($data, $staticData) as $key => $value) {
 
             if (
+                $isolated &&
                 !__resp_str_startsWith($key, "*-") &&
                 !__resp_str_startsWith($key, "$themeSlug-") &&
                 !in_array($key, self::SPECIAL_TAGS) &&
@@ -144,7 +147,7 @@ class Classifier extends Component
         $class_filters = [];
 
         foreach(__resp_get_states() as $state){
-            self::mergeState($class_filters , $role , $state , $gbClass , $smClass , $page_namespace );
+            self::mergeState($class_filters , $role , $state , $gbClass , $smClass , $page_namespace , $section_prefix);
         }
 
         foreach ($class_filters as $filter) {
@@ -157,7 +160,7 @@ class Classifier extends Component
     /**
      * @since 0.9.3
      */
-    private static function mergeState(&$class_filters , $role , $state , $gbClass , $smClass , $page_namespace){
+    private static function mergeState(&$class_filters , $role , $state , $gbClass , $smClass , $page_namespace , $section_prefix){
 
         if(!empty($state)){
             $state = ":$state";
@@ -166,10 +169,10 @@ class Classifier extends Component
         $class_filters = __resp_array_merge($class_filters, [
             "{$gbClass}{$state}-classes", 
             "$page_namespace--{$role}{$state}-classes"
-        ], (empty($section_prefix) ? [] : ["$smClass{$state}-classes"]));
+        ], (empty($section_prefix) ? [] : ["{$smClass}{$state}-classes"]));
 
         if (in_array($role, self::SPECIAL_TAGS)) {
-            $class_filters[] = "$role{$state}-classes";
+            $class_filters[] = "{$role}{$state}-classes";
         }
 
     }
@@ -213,6 +216,7 @@ class Classifier extends Component
         $atts = __resp_array_merge($atts, [
             "data-class-filters" => implode(" ", $class_filters)
         ]);
+        
 
         return [
             "attr" => $atts,

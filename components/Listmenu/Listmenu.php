@@ -89,9 +89,10 @@ class ListMenu extends Component
         if (!isset(self::$currentItem)) {
             return "";
         }
+
         switch ($param) {
             case "url":
-                return self::$currentItem->url;
+                return esc_url(self::$currentItem->url);
             case "slug":
                 return sanitize_title(self::$currentItem->title);
             case "title":
@@ -230,7 +231,7 @@ class ListMenu extends Component
 
         $menuLoc = $atts["menu"] ?? ($atts["theme_location"] ?? "");
 
-        if(!has_nav_menu($menuLoc)){
+        if(!has_nav_menu($menuLoc) && isset($atts["theme_location"])){
             return;
         }
 

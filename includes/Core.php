@@ -37,7 +37,7 @@ class Core
         add_action('customize_register', [$this, 'installControls']);
 
         add_action('template_redirect', [$this, 'underConstructionHandler'], 10);
-
+        
         fm::definePath(
             "@templates",
             fm::getRespContentDirectoryPath("templates"),
@@ -176,10 +176,13 @@ class Core
 
         $temp = [];
 
-        array_walk($params, function ($item, $key) use (&$temp) {
+        $slug = ThemeBuilder::getSlug();
+
+        $isolated = self::option("resp_isolation");
+
+        array_walk($params, function ($item, $key) use (&$temp , $slug) {
             if(__resp_str_startsWith($key ,"*-"))
             {
-                $slug = ThemeBuilder::getSlug();
                 $newKey = str_replace("*-" , "$slug-" , $key );
                 $temp[$newKey] = $item;
             } else {
@@ -187,13 +190,15 @@ class Core
             }
         });
 
+
+
         $params = $temp;
 
         $pageNS =  __resp_array_item($params, "$page_namespace--$name",  null);
 
-        $sectionNS = __resp_array_item($params, "resp-$section_prefix--$name",  null);
+        $sectionNS = __resp_array_item($params, $isolated ? "$section_prefix--$name" : "$slug-$section_prefix--$name",  null);
 
-        $globalNS =  __resp_array_item($params, "resp--$name",  null);
+        $globalNS =  __resp_array_item($params, $isolated ? $name : "$slug--$name",  null);
 
         if (isset($globalNS)) {
             return $globalNS;
@@ -485,9 +490,13 @@ class Core
     {
         global $page_namespace;
 
+        $isolated = self::option("resp_isolation");
+
+        $slug =  ThemeBuilder::getSlug();
+
         $value = apply_filters("$page_namespace--$role-value", "") ?: $value;
 
-        $value = apply_filters("resp--$role-value", "") ?: $value;
+        $value = apply_filters($isolated ? "$role-value" : "$slug--$role-value", "") ?: $value;
 
         if ($echo) {
             echo $value;
@@ -562,7 +571,7 @@ class Core
 
         $showThumbnail = __resp_tp("thumbnail", true);
 
-        $thumbnailContainer = __resp_tp("thumbnail-container", "div");
+        $thumbnailContainer = __resp_tp("thumbnail-container", "figure");
 
         $thumbnailSize  = __resp_tp("thumbnail-size", "large");
 
@@ -583,9 +592,9 @@ class Core
         }
 
 
-        Core::thumbnailCheck($thumbnailAttr, get_the_ID());
+        self::thumbnailCheck($thumbnailAttr, get_the_ID());
 
-        Core::thumbnailCheck($thumbnailImageAttr, get_the_ID());
+        self::thumbnailCheck($thumbnailImageAttr, get_the_ID());
         
         if (($showThumbnail && has_post_thumbnail()) || is_attachment()) {
         
@@ -596,7 +605,7 @@ class Core
             }
             
             if ($thumbnailContainer) {
-                Core::trigger("thumbnail-before-container", true);
+                self::trigger("thumbnail-before-container", true);
 
                 if ($thumbnailMode == "background") {
                     $thumbnailAttr["style"] = [
@@ -604,14 +613,14 @@ class Core
                     ];
                 }
 
-                Core::tag($thumbnailContainer, "thumbnail-container", "", [
+                self::tag($thumbnailContainer, "thumbnail-container", "", [
                     "attr" => $thumbnailAttr
                 ])->eo();
             }
 
             if ($thumbnailMode == "image") {
 
-                Core::trigger("thumbnail-before-image", true);
+                self::trigger("thumbnail-before-image", true);
 
                 if(is_attachment()){
                     $thumbnailId = get_the_ID();
@@ -628,9 +637,9 @@ class Core
                 $thumbnailImageAttr["attr"]["alt"] = $thumbnailAlt;
                 $thumbnailImageAttr["attr"]["src"] = $thumbnail;
 
-                Core::tag("img", "thumbnail-image", null, $thumbnailImageAttr)->e();
+                self::tag("img", "thumbnail-image", null, $thumbnailImageAttr)->e();
 
-                Core::trigger("thumbnail-after-image", true);
+                self::trigger("thumbnail-after-image", true);
             }
 
 
@@ -638,7 +647,7 @@ class Core
 
                 Tag::close($thumbnailContainer);
 
-                Core::trigger("thumbnail-after-container", true);
+                self::trigger("thumbnail-after-container", true);
             }
         }
     }
@@ -666,7 +675,7 @@ class Core
         }
 
 
-        $item = Core::tag($itemElement,  "item",  '',  ["class" => $itemTags]);
+        $item = self::tag($itemElement,  "item",  '',  ["class" => $itemTags]);
 
 
 
@@ -687,13 +696,13 @@ class Core
         }
 
 
-        Core::trigger("item-before-container", true, get_the_ID());
+        self::trigger("item-before-container", true, get_the_ID());
 
 
         $item->eo();
 
 
-        Core::trigger("item-before-content", true, get_the_ID());
+        self::trigger("item-before-content", true, get_the_ID());
 
 
         get_template_part("template-parts/sections/categories");
@@ -702,7 +711,7 @@ class Core
         // Render the item thumbnail
         if ($showThumbnail && $hasThumb) {
 
-            Core::tag("div", "item-thumbnail", '')->filter([
+            self::tag("div", "item-thumbnail", '')->filter([
                 "class" => "item-thumbnail-classes"
             ])->eo();
 
@@ -748,14 +757,14 @@ class Core
             Tag::close("div");
         }
 
-        Core::tag("div", "item-body", '')->eo();
+        self::tag("div", "item-body", '')->eo();
 
 
-        Core::trigger("item-before-title", true, get_the_ID());
+        self::trigger("item-before-title", true, get_the_ID());
 
 
 
-        Core::tag("a", "item-title", get_the_title(), [
+        self::tag("a", "item-title", get_the_title(), [
             "attr" => ["href" => get_the_permalink()]
         ])->filter([
             "name" => ["resp--item-title-element", "$page_namespace--item-title-element"],
@@ -764,20 +773,20 @@ class Core
         ], get_the_ID())->e();
 
 
-        Core::trigger("item-after-title", true, get_the_ID());
+        self::trigger("item-after-title", true, get_the_ID());
 
 
-        Core::trigger("item-before-excerpt", true, get_the_ID());
+        self::trigger("item-before-excerpt", true, get_the_ID());
 
 
-        Core::tag("p", "item-excerpt", get_the_excerpt())->filter([
+        self::tag("p", "item-excerpt", get_the_excerpt())->filter([
             "name" => ["resp--item-excerpt-element-name", "$page_namespace--item-excerpt-element-name"],
             "attr" => ["resp--item-excerpt-element-attributes"],
             "content" => ["resp--item-excerpt", "$page_namespace--item-excerpt"]
         ], get_the_ID())->render(true);
 
 
-        Core::trigger("item-after-excerpt", true, get_the_ID());
+        self::trigger("item-after-excerpt", true, get_the_ID());
 
 
         Tag::close("div");
@@ -785,11 +794,11 @@ class Core
         get_template_part("template-parts/sections/tags");
 
 
-        Core::trigger("item-after-content", true, get_the_ID());
+        self::trigger("item-after-content", true, get_the_ID());
 
         Tag::close($itemElement);
 
 
-        Core::trigger("item-after-container", true, get_the_ID());
+        self::trigger("item-after-container", true, get_the_ID());
     }
 }

@@ -38,12 +38,6 @@ class TagHelper extends Component
         add_shortcode('resp-tag-group', [$this, 'tagGroupShortcode']);
 
         add_filter('no_texturize_shortcodes', [$this, 'exemptFromWptexturize']);
-
-        __resp_register_parser( 
-            "resp-tag" ,  
-            "resp-tag" , 
-            [$this , "tagShortcode"]
-        );
         
     }
 
@@ -115,7 +109,7 @@ class TagHelper extends Component
     /**
      * @since 0.9.0
      */
-    function tagShortcode($atts = [], $content = null, $tag)
+    function tagShortcode($atts = [], $content = null)
     {
 
         if(!is_array($atts)){
@@ -131,10 +125,12 @@ class TagHelper extends Component
 
         dom::getJsonAttributes($atts , $content);
 
+       
         if(!empty($content) && empty($atts["content"] ?? "")){
             $atts["content"] = $content;
         }
 
+        $atts["content"] = apply_filters("resp-core--config-output" , $atts["content"]);
     
         $result = Tag::create($atts);
 

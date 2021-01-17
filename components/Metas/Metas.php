@@ -7,7 +7,7 @@
 
 namespace Resp\Components;
 
-use Resp\Component, Resp\ThemeBuilder as tb, Resp\Tag;
+use Resp\Component, Resp\ThemeBuilder as tb, Resp\Tag,  Resp\Core;
 
 defined('RESP_VERSION') or die;
 
@@ -28,9 +28,11 @@ class Metas extends Component
      */
     function onDataLoaded(){
 
-        $slug = tb::getSlug();
+        $action = "before-head";
 
-        add_action("$slug--before-head",  [$this, "printMetas"] , 10);
+        Core::chkIsolation($action , "--");
+
+        add_action($action,  [$this, "printMetas"] , 10);
     }
 
     /**

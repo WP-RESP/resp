@@ -15,14 +15,6 @@ defined('RESP_VERSION') or die;
 class DOMHandlers
 {
 
-    /**
-     * @since 0.9.2
-     */
-    static function parseContent(&$atts = [], &$content = null)
-    {
-        // TODO: render RESP tags
-    }
-
 
     /**
      * @since 0.9.2
@@ -121,6 +113,21 @@ class DOMHandlers
     }
 
 
+    /**
+     * @since 0.9.4
+     */
+    static function removeComments(&$doc , $holder = null){
+        $xpath = new DOMXPath($doc);
+
+        // remove comments
+        foreach ($xpath->query('//comment()') as $comment) {
+            if (!is_null($holder) && $comment->parentNode->nodeName != $holder) {
+                continue;
+            }
+            $comment->parentNode->removeChild($comment);
+        }
+    }
+
 
     /**
      * @since 0.9.2
@@ -130,27 +137,14 @@ class DOMHandlers
 
         $holder = "resp-attributes";
 
-        $content = apply_filters("resp-core--config-output" , $content);
-
         $doc = self::createDocument($content);
 
         $removeList = [];
 
         // get attribute nodes
         $attributeNodes = $doc->getElementsByTagName($holder);
-        
 
-        $xpath = new DOMXPath($doc);
-
-
-        // remove comments
-        foreach ($xpath->query('//comment()') as $comment) {
-            if ($comment->parentNode->nodeName != $holder) {
-                continue;
-            }
-            $comment->parentNode->removeChild($comment);
-        }
-
+        self::removeComments($doc , $holder);
 
         foreach ($attributeNodes as $node) {
 
@@ -161,6 +155,8 @@ class DOMHandlers
             $removeList[] = $node;
 
             $nodeValue = self::innerHTML($node);
+
+            $nodeValue = apply_filters("resp-core--config-output" , $nodeValue);
 
             $json = do_shortcode($nodeValue, true);
 
@@ -188,4 +184,5 @@ class DOMHandlers
 
         
     }
+    
 }

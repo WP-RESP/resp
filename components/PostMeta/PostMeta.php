@@ -418,7 +418,12 @@ class PostMeta extends Component
             return $output;
         }
 
-        foreach (array_merge(self::$post_data, ["id", "permalink"]) as $param) {
+        foreach (array_merge(self::$post_data, [
+            "id", 
+            "permalink" , 
+            "thumbnail",
+            "image"
+            ]) as $param) {
 
             $keyword = "@post:$param";
 
@@ -432,6 +437,12 @@ class PostMeta extends Component
                     break;
                 case "permalink":
                     $value = get_permalink($post->ID);
+                    break;
+                case "thumbnail" :
+                    $value = get_the_post_thumbnail_url( $post->ID );
+                    break;
+                case "image" :
+                    $value = get_the_post_thumbnail_url( $post->ID , "full");
                     break;
                 default:
                     $value = $post->$param;

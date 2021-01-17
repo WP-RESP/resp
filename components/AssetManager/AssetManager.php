@@ -41,7 +41,7 @@ class AssetManager extends Component
 
         //add_action("resp-settings-after-content_edit", "$class::renderAssetsSection");
         //add_action("resp-admin--submenu-tabs_edit", "$class::renderAssetsTab");
-
+        
         add_action("resp-themebuilder-build", [$this, "extractPackages"]);
         add_action("resp-themebuilder-build", [$this, "extractPaths"]);
         add_action("wp_enqueue_scripts", [$this, "registerPackages"]);
@@ -50,7 +50,7 @@ class AssetManager extends Component
     }
 
 
-
+    
     /**
      * @since 0.9.0
      */
@@ -331,7 +331,7 @@ class AssetManager extends Component
             return;
         }
 
-        $path = $atts["path"];
+        $path = apply_filters( "resp-core--config-output" , $atts["path"]);
 
 
         tb::chkForPartials($path);
