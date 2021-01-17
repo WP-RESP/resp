@@ -494,9 +494,9 @@ class Core
 
         $slug =  ThemeBuilder::getSlug();
 
-        $value = apply_filters("$page_namespace--$role-value", "") ?: $value;
+        $value = apply_filters("$page_namespace--$role-value", '') ?: $value;
 
-        $value = apply_filters($isolated ? "$role-value" : "$slug--$role-value", "") ?: $value;
+        $value = apply_filters($isolated ? "$role-value" : "$slug--$role-value", '') ?: $value;
 
         if ($echo) {
             echo $value;

@@ -11,29 +11,41 @@ global $page_namespace;
 
 Core::initPage("page-404");
 
-Core::trigger("before-container" , true);
+Core::trigger("before-container", true);
 
 Core::tag("div", "container", '')->eo();
 
-Core::trigger("before-content" , true);
+Core::trigger("before-content", true);
 
 Core::tag("div", "content", "")->eo();
 
 Core::trigger("before-code");
 
-Core::tag("h1", "code", apply_filters("$page_namespace--code-value" , "") ?: esc_html__("404" , "resp"))->e();
+Core::tag("h1", "code", Core::text(esc_html__("404", "resp"), "code", false))->e();
 
 Core::trigger("before-title");
 
-Core::tag("h3", "title", apply_filters("$page_namespace--title-value" , "") ?: esc_html__("Page Not Found" , "resp"))->e();
+Core::tag("h3", "title", Core::text(esc_html__("Page Not Found", "resp"), "title", false))->e();
 
 Core::trigger("before-message");
 
-Core::tag("p", "message", apply_filters("$page_namespace--message-value", "") ?: esc_html__("The page you are looking for might have been removed, had its name changed, or is temporarily unavailable." , "resp"))->e();
+Core::tag(
+    "p",
+    "message",
+    Core::text(
+        esc_html__("The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.", "resp"),
+        "message",
+        false
+    )
+)->e();
 
 Core::trigger("before-back-to-homepage");
 
-Core::tag("a", "back-to-homepage", apply_filters("$page_namespace--back-to-homepage-value" , "") ?: esc_html__('Back To Homepage' , "resp"))->set(["attr" => [
+Core::tag("a", "back-to-homepage", Core::text(
+    esc_html__("Back To Homepage", "resp"),
+    "back-to-homepage",
+    false
+))->set(["attr" => [
     "href" => get_home_url()
 ]])->e();
 

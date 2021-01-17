@@ -68,20 +68,39 @@ Core::tag($wrapElement, "content", '')->eo();
 
 Core::trigger("before-title", true);
 
-if (!have_posts() && isset($_REQUEST['s'])) {
+if (!have_posts() && is_search()) {
 
-    Core::tag("h2", "title",  sprintf(
-         /* translators: %s is replaced with "string" */
-        esc_html__("No results are available for \"%s\"", "resp"), $_REQUEST['s']))->e();
+    $searchQuery = get_search_query();
+
+    $msg = Core::text(
+        /* translators: %s is replaced with "string" */
+        esc_html__("No results are available for \"%s\"", "resp"),
+        "title:no-results",
+        false
+    );
+
+    $msg = sprintf($msg, $searchQuery);
+
+    Core::tag("h2", "title",  $msg)->e();
 
 } else {
 
     if (isset($tax)) {
-        Core::tag("h2", "title",  esc_html__($tax->name , "resp"))->e();
-    } else if (isset($_REQUEST['s']) && !empty($_REQUEST['s'])) {
-        Core::tag("h2", "title",  sprintf(
-             /* translators: %s is replaced with "string" */
-            esc_html__("Results for \"%s\"", "resp"), $_REQUEST['s']))->e();
+
+        Core::tag("h2", "title",  esc_html__($tax->name, "resp"))->e();
+        
+    } else if (is_search() && !empty($searchQuery)) {
+
+        $msg = Core::text(
+            /* translators: %s is replaced with "string" */
+            esc_html__("Results for \"%s\"", "resp"),
+            "title",
+            false
+        );
+
+        $msg = sprintf($msg, $searchQuery);
+
+        Core::tag("h2", "title", $msg)->e();
     }
 }
 
@@ -98,7 +117,7 @@ while (have_posts()) {
 
     the_post();
 
-    Core::postList($itemElement, $showThumbnail, $thumbnailMode, $thumbnailSize , $thumbnailAttr);
+    Core::postList($itemElement, $showThumbnail, $thumbnailMode, $thumbnailSize, $thumbnailAttr);
 }
 
 
