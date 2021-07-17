@@ -54,7 +54,7 @@ class ThemeValues extends Component
 
         //add_action('customize_save_after',  [$this,  'customizeSave']);
 
-        add_action('wp_enqueue_scripts', [$this, 'enqueueScripts'], PHP_INT_MAX);
+        add_action('wp_enqueue_scripts', [$this, 'enqueueScripts'] , PHP_INT_MAX);
         add_shortcode('resp-value', [$this, 'valueShortcode']);
         add_shortcode('resp-number', [$this, 'numberShortcode']);
 
@@ -119,10 +119,10 @@ class ThemeValues extends Component
     /**
      * @since 0.9.0
      */
-    function enqueueScripts()
+    public function enqueueScripts()
     {
         if (!is_customize_preview()) {
-            return;
+           return;
         }
 
         wp_enqueue_script("resp-cmp-value", $this->getAssetsUri("customizer.js"), ["jquery"], RESP_VERSION, true);
@@ -297,7 +297,7 @@ class ThemeValues extends Component
 
 
             if (!isset($value["value"])) {
-                continue;
+                $value["value"] = "";
             }
 
 
@@ -473,11 +473,31 @@ class ThemeValues extends Component
 
             $attr = __resp_array_item($mod, "attr", []);
 
+            if(is_customize_preview()){
+                $attr["data-partial-type"] = $mod["type"];
+            }
+
             if(is_array($attr)){
                 array_walk($attr, function (&$item, $key) {
-                    $item = apply_filters("resp-core--config-output", $item);
+                    if(!is_array($item)){
+                        $item = apply_filters("resp-core--config-output", $item);
+                    }else{
+                        // TODO: apply filters on items
+                    }
                 });
             }
+
+            
+
+            if(in_array( $mod["type"] ?? "text" , ["text" , "textarea"])){
+                $value = esc_html($value);
+            }
+
+            if(in_array( $mod["type"] ?? "text" , ["imageSrc" , "url"])){
+                $value = esc_url($value);
+            }
+
+            
 
             $value = Tag::create([
                 "name" => $mod["container"],
@@ -498,7 +518,7 @@ class ThemeValues extends Component
 
         if (!isset(self::$values[$mod_name])) {
             /* translators: %s is replaced with "string" */
-            __resp_error(sprintf(esc_html__("Value is not defined: %s", "resp"), $mod_name));
+            // __resp_error(sprintf(esc_html__("Value is not defined: %s", "resp"), $mod_name));
             return;
         }
 
@@ -615,7 +635,6 @@ class ThemeValues extends Component
 
         $realName = __resp_esc_state($name);
 
-
         // get the value
         foreach ($states as $state) {
             if (!empty($state)) {
@@ -623,7 +642,6 @@ class ThemeValues extends Component
             }
             self::retrieveValue($value, "{$realName}{$state}");
         }
-
 
         if (empty($value)) {
             return;
@@ -636,8 +654,11 @@ class ThemeValues extends Component
             self::convert($value, self::$values[$name]["as"], self::$values[$name]["to"], $content,  $ignore_html);
         }
 
+
+
         // check for container
         self::checkContainer(self::$values[$name], $value, is_customize_preview() ? $name : "");
+
 
         return $value;
     }
@@ -648,8 +669,12 @@ class ThemeValues extends Component
     static function replaceValueParams($output){
         foreach(self::$values as $key => $params){
             $keyword = "@value:$key";
+            if(is_array($output)){
+                echo "<code>" . var_dump($output) . "</code>";
+                continue;
+            }
             if(strpos($output , $keyword) > -1){
-                $value =  do_shortcode("[resp-value name='$key']");
+                $value =  do_shortcode("[resp-value name='$key']" , false);
                 $output = str_replace($keyword, $value, $output);
             }
         }

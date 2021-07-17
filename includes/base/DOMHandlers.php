@@ -135,32 +135,25 @@ class DOMHandlers
     static function getJsonAttributes(&$attr, &$content)
     {
 
-        $holder = "resp-attributes";
+        $holder  = "resp-attributes";
 
         $doc = self::createDocument($content);
 
-        $removeList = [];
-
-        // get attribute nodes
-        $attributeNodes = $doc->getElementsByTagName($holder);
-
         self::removeComments($doc , $holder);
 
+        $xpath = new DOMXpath($doc);
+
+        $attributeNodes = $xpath->query("/html/body/$holder");
+
         foreach ($attributeNodes as $node) {
-
-            if ($node->parentNode->nodeName != "body") {
-                continue;
-            }
-
-            $removeList[] = $node;
 
             $nodeValue = self::innerHTML($node);
 
             $nodeValue = apply_filters("resp-core--config-output" , $nodeValue);
 
             $json = do_shortcode($nodeValue, true);
-
-            $json = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $json);
+            
+            //$json = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $json);
 
             $data = json_decode($json, true);
 
@@ -176,7 +169,7 @@ class DOMHandlers
             $attr = array_merge($attr, $data);
         }
 
-        foreach ($removeList as $node) {
+        foreach ($attributeNodes as $node) {
             $node->parentNode->removeChild($node);
         }
 

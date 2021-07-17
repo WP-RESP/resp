@@ -427,6 +427,11 @@ class PostMeta extends Component
 
             $keyword = "@post:$param";
 
+            if(is_array($output)){
+                echo "<code>" . var_dump($output) . "</code>";
+                continue;
+            }
+
             if(strpos($output , $keyword) < 0){
                 continue;
             }
@@ -448,8 +453,10 @@ class PostMeta extends Component
                     $value = $post->$param;
             }
 
-            if (in_array($param, ["guid", "permalink"])) {
+            if (in_array($param, ["thumbnail" , "image" ,"guid", "permalink"])) {
                 $value = esc_url($value);
+            }else{
+                $value = esc_attr($value);
             }
 
             $output = str_replace($keyword, $value, $output);

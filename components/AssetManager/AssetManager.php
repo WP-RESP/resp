@@ -333,24 +333,17 @@ class AssetManager extends Component
 
         $path = apply_filters( "resp-core--config-output" , $atts["path"]);
 
-
         tb::chkForPartials($path);
-
-
+        /*
         if (!__resp_str_startsWith($path, "@templates/")) {
             $path = "@templates/" . ltrim($path, "\/");
         }
-
-
+        */
         fm::fixUndefinedExtension($path, self::VIEW_FILE_EXTENSION);
 
         fm::useDefinedPaths($path, true);
 
-
-
         $info = pathinfo($path);
-
-
 
         if (!in_array($info["extension"], ["html", "htm", "temp", "tmp"])) {
             return Tag::code("Invalid file extension \"$path\"")->render();
@@ -362,6 +355,8 @@ class AssetManager extends Component
         }
 
         $temp = file_get_contents($path);
+
+        $temp = apply_filters( "resp-core--config-output" , $temp);
 
         return do_shortcode($temp, false);
     }

@@ -11,30 +11,34 @@ global $page_namespace, $section_prefix;
 
 $item_tags = get_the_tags(get_the_ID());
 
+$useSectionName = __resp_tp("tags-use-section" , false );
+
+$prefix = (!empty($section_prefix) && $useSectionName) ?  "$section_prefix-tags" : "tags";
+
+Core::trigger("$prefix-before-container");
+
 if ($item_tags) {
-
-    Core::trigger(empty($section_prefix) ? "tags-before-container" : "$section_prefix-tags-before-container");
-
-    Core::tag("ul", empty($section_prefix) ? "tags" : "$section_prefix-tags", '')->eo();
+    
+    Core::tag("ul", "$prefix-container", '')->eo();
 
     foreach ($item_tags as $tag) {
 
-        Tag::create([
-            "name" => "li",
-            "class" => ["tag-$tag->slug"]
-        ])->append(
-            new Tag([
-                "name" => "a",
-                "content" => $tag->name,
-                "attr" => [
-                    "href" => esc_url(get_tag_link($tag)),
-                    "rel" => "category tag"
-                ]
-            ])
-        )->render(true);
+        Core::tag("li" , "$prefix-item" , "" , [
+            "class" => [urldecode("tag-$tag->slug")]
+        ])->eo();
+
+        Core::tag("a" , "$prefix-item-link", $tag->name , [
+            "attr" => [
+                "href" => esc_url(get_tag_link($tag)),
+                "rel" => "category tag"
+            ]
+        ])->e();    
+
+        Tag::close("li");
     }
 
     Tag::close("ul");
 
-    Core::trigger(empty($section_prefix) ? "tags-after-container" : "$section_prefix-tags-after-container");
 }
+
+Core::trigger("$prefix-after-container");

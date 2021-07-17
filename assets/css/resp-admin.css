@@ -185,7 +185,8 @@
 }
 
 .resp-card > .form-table {
-  margin: 6px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
 }
 
 .resp-card.product-info {
@@ -216,6 +217,10 @@
   border-radius: 6px;
   font-weight: normal;
   margin: 6px !important;
+}
+
+a.nav-tab.resp-dash-tab {
+  margin-left: 6px !important;
 }
 
 .resp-nav-tab-wrapper .nav-tab:hover {

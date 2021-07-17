@@ -18,7 +18,7 @@ class SiteInfo extends Component
         "name", "description", "wpurl", "url", "admin_email", "charset", "version",
         "html_type", "text_direction", "language", "stylesheet_url", "stylesheet_directory",
         "template_url", "template_directory", "pingback_url", "atom_url", "rdf_url",
-        "rss_url", "rss2_url", "comments_atom_url", "comments_rss2_url", "siteurl", "home"
+        "rss_url", "rss2_url", "comments_atom_url", "comments_rss2_url", "siteurl"
     ];
 
     function __construct()
@@ -64,6 +64,7 @@ class SiteInfo extends Component
         $param = $names[0];
 
         if (in_array($param, self::BLOG_INFO_PARAMS)) {
+
             $output = get_bloginfo($param);
 
             self::checkForEscURL($param, $output);
@@ -116,7 +117,7 @@ class SiteInfo extends Component
         if (in_array($param, [
             "wpurl", "url", "stylesheet_url", "template_url", "pingback_url",
             "atom_url", "rdf_url", "rss_url", "rss2_url", "comments_atom_url", "comments_rss2_url",
-            "siteurl", "home"
+            "siteurl"
         ])) {
             $value = esc_url($value);
         }

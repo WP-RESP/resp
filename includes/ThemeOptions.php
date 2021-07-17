@@ -239,7 +239,7 @@ class ThemeOptions
 
         Tag::h3(esc_html__("Version", "resp") . " " . RESP_VERSION, [])->set([
             "attr" => ["data-nonce" => $nonce],
-            "class" => ["version", "resp-spinner-container" , "busy"],
+            "class" => ["version", "resp-spinner-container" ],
             "id" => "version_holder"
         ])->append([
             Tag::create([
@@ -512,7 +512,7 @@ class ThemeOptions
 
         $link = Tag::a(esc_html__($title, "resp"), admin_url("admin.php?page=resp&tab=$name"))
             ->set(["append_content" => true])
-            ->addClass("nav-tab");
+            ->addClass(["nav-tab" , "resp-dash-tab"]);
 
         if ($currentTab == $name) {
             $link->addClass('nav-tab-active');

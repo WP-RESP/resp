@@ -17,18 +17,18 @@ defined('RESP_VERSION') or die;
 class Core
 {
 
-
     const DATA_THEME_PARAMS = "parameters";
 
     private static $instance;
 
     private static $components = [];
 
-
     function __construct()
     {
 
         do_action("resp-core--pre-init");
+
+        add_action('init' , [$this, 'loadConstants'] );
 
         add_action('wp_enqueue_scripts', [$this, 'enqueueScripts']);
 
@@ -50,7 +50,7 @@ class Core
             fm::getRespDirectory("assets")
         );
 
-        cl::load(path_join(get_template_directory(), "options.json"));
+       
 
         to::init();
 
@@ -59,6 +59,14 @@ class Core
         self::installComponents();
         
         do_action('resp-core--post-init');
+    }
+
+
+    /**
+     * @since 0.9.0
+     */
+    function loadConstants(){
+        cl::load(path_join(get_template_directory(), "options.json"));
     }
 
 
@@ -189,8 +197,6 @@ class Core
                 $temp[$key] = $item;
             }
         });
-
-
 
         $params = $temp;
 
@@ -364,6 +370,10 @@ class Core
     {
 
         $slug = ThemeBuilder::getSlug();
+
+        if( __resp_str_startswith( $param , $slug ) ){
+            return;
+        }
 
         if (self::option("resp_isolation")) {
             $param = $slug . $sep . $param;

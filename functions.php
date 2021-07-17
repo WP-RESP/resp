@@ -16,7 +16,7 @@ function __resp_init()
 
     define("RESP_MAIN_SERVER", "https://wp-resp.com");
     define("RESP_OPTION_GROUP", "resp");
-    define("RESP_VERSION", "0.9.4");
+    define("RESP_VERSION", "0.9.5");
 
     foreach ([
         "base/DOMHandlers",
@@ -117,8 +117,6 @@ function __resp_db_error()
         echo "<pre><code>{$wpdb->last_error}</code></pre>";
     }
 }
-
-
 
 
 /**

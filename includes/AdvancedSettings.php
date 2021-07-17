@@ -19,7 +19,7 @@ class AdvancedSettings
      */
     static function bind()
     {
-        add_action("admin_init", "\Resp\AdvancedSettings::adminInit");
+        add_action("admin_init", "\Resp\AdvancedSettings::adminInit", 10);
     }
 
 
@@ -29,20 +29,18 @@ class AdvancedSettings
     static function adminInit()
     {
 
-        $class = "Resp\AdvancedSettings";
+        $class = get_called_class();
 
         $options = ConstantLoader::getConstants();
 
-
         $callback = "$class::settingFieldsCallback";
-
 
         $group = RESP_OPTION_GROUP . "-settings";
 
 
         add_settings_section(
             $group,
-            esc_html__("Advanced Settings" , "resp"),
+            esc_html__("Advanced Settings", "resp"),
             "$class::settingSectionCallback",
             $group
         );
@@ -87,7 +85,7 @@ class AdvancedSettings
         }
 
         if (is_string($args['default'])) {
-            Tag::labelFor($args['label_for'],  esc_html__($args["description"], "resp"), ["append_content" => true])->eo();
+            Tag::labelFor($args['label_for'],  Tag::p(esc_html__($args["description"], "resp"))->render(), ["append_content" => true])->eo();
             Tag::textFor($args['label_for'], $value, ["class" => "regular-text"])->e();
             Tag::close("label");
         }

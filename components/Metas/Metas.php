@@ -20,76 +20,73 @@ class Metas extends Component
 
     function __construct()
     {
-        add_action("resp-themebuilder-build", [$this, 'onDataLoaded'], 10);  
+        add_action("resp-themebuilder-build", [$this, 'onDataLoaded'], 10);
     }
 
     /**
      * @since 0.9.1
      */
-    function onDataLoaded(){
+    function onDataLoaded()
+    {
 
         $action = "before-head";
 
-        Core::chkIsolation($action , "--");
+        Core::chkIsolation($action, "--");
 
-        add_action($action,  [$this, "printMetas"] , 10);
+        add_action($action,  [$this, "printMetas"], 10);
     }
 
     /**
      * @since 0.9.1
      */
-    function printMetas(){
+    function printMetas()
+    {
 
-        $data = array_merge_recursive( 
+        $data = array_merge_recursive(
             tb::getData(self::METAS_DEF_NAME),
             tb::getStatics(self::METAS_DEF_NAME)
         );
 
-        if(empty($data)){
+        if (empty($data)) {
             return;
         }
 
         $all = $data["@all"] ?? [];
 
-        if(is_front_page()){
-            $all = array_merge($all , $data["@home"] ?? []);
+        if (is_front_page()) {
+            $all = array_merge($all, $data["@home"] ?? []);
+        } else if (is_page()) {
+            $all = array_merge($all, $data["@page"] ?? []);
+        } else {
+            if (is_single()) {
+                $all = array_merge($all, $data["@single"] ?? []);
+            }
+            if (is_attachment()) {
+                $all = array_merge($all, $data["@attachment"] ?? []);
+            }
         }
 
-        if(is_single()){
-            $all = array_merge($all , $data["@single"] ?? []);
-        }
+        array_walk($all, function (&$param, $index) {
 
-        if(is_attachment()){
-            $all = array_merge($all , $data["@attachment"] ?? []);
-        }
-
-        if(is_page()){
-            $all = array_merge($all , $data["@page"] ?? []);
-        }
-
-        array_walk($all , function(&$param , $index) { 
-
-            if(!is_array($param)){
+            if (!is_array($param)) {
                 return;
             }
 
-            array_walk($param , function(&$item , $key) { 
+            array_walk($param, function (&$item, $key) {
 
-                $item = apply_filters("resp-core--config-output" , $item);
-                
+                $item = apply_filters("resp-core--config-output", $item);
             });
-
         });
 
         self::$metas = $all;
 
-        foreach(self::$metas as $key => $meta){
+        foreach (self::$metas as $key => $meta) {
 
             $name = $meta["wrap"] ?? "meta";
 
             $attr = $meta;
 
-            if(isset($attr["wrap"])) {
+            if (isset($attr["wrap"])) {
                 unset($attr["wrap"]);
             }
 
@@ -98,6 +95,5 @@ class Metas extends Component
                 "attr" => $attr
             ])->e();
         }
-
     }
 }

@@ -108,7 +108,7 @@ if (typeof wp !== "undefined" && typeof wp.i18n !== "undefined") {
 
             case "dashboard":
 
-                setTimeout(function () {
+                /*setTimeout(function () {
                     window.respAdmin.com.ajax($("#version_holder"), "resp_fetch_version_data", function (wrap, result) {
                         if (result !== d.version) {
                             var href = d.admin.mainServer;
@@ -119,7 +119,7 @@ if (typeof wp !== "undefined" && typeof wp.i18n !== "undefined") {
                             ));
                         }
                     });
-                }, 2000);
+                }, 2000);*/
 
                 setTimeout(function () {
                     window.respAdmin.com.ajax($("#server_info_wrap"), "resp_fetch_dashboard_data", function (wrap, result) {

@@ -15,22 +15,39 @@ class FileManager
     private static $paths = [];
 
 
-     /**
+    /**
      * @since 0.9.0
      */
-    static function getDefinedPaths(){
-       return self::$paths;
+    static function getDefinedPaths()
+    {
+        return self::$paths;
     }
 
+    /**
+     * @since 0.9.5
+     */
+    static function pathToUrl($path)
+    {
+        return str_replace(WP_CONTENT_DIR, WP_CONTENT_URL, $path);
+    }
+
+    /**
+     * @since 0.9.5
+     */
+    static function urlToPath($path)
+    {
+        return str_replace(WP_CONTENT_URL, WP_CONTENT_DIR, $path);
+    }
 
     /**
      * @since 0.9.0
      */
-    static function definePath($keys , $path , $fallback = null){
-        if(!is_array($keys)){
+    static function definePath($keys, $path, $fallback = null)
+    {
+        if (!is_array($keys)) {
             $keys = [$keys];
         }
-        foreach($keys as $key){
+        foreach ($keys as $key) {
             self::$paths[$key] = [
                 "path" => $path,
                 "fallback" => $fallback
@@ -42,10 +59,10 @@ class FileManager
     /**
      * @since 0.9.0
      */
-    static function fixUndefinedExtension(&$path , $ext)
+    static function fixUndefinedExtension(&$path, $ext)
     {
         $pathInfo = pathinfo($path);
-        if(!isset($pathInfo["extension"])){
+        if (!isset($pathInfo["extension"])) {
             $path = "$path/{$pathInfo['basename']}.$ext";
         }
     }
@@ -54,33 +71,32 @@ class FileManager
     /**
      * @since 0.9.0
      */
-    static function useDefinedPaths(&$path , $fallback = false){
+    static function useDefinedPaths(&$path, $fallback = false)
+    {
 
-        foreach(self::$paths as $key => $value)
-        {
+        foreach (self::$paths as $key => $value) {
 
-            if(!__resp_str_startsWith($path , $key)){
+            if (!__resp_str_startsWith($path, $key)) {
                 continue;
             }
 
 
             $val = $value;
 
-            if(!is_array($val)){
+            if (!is_array($val)) {
                 $val = [
                     "path" => $val
                 ];
             }
 
-            if(!isset($val["path"]))
-            {
+            if (!isset($val["path"])) {
                 continue;
             }
-            
+
 
             $temp = str_replace($key, $val["path"], $path);
 
-            if(!file_exists($temp) && $fallback && isset($val["fallback"])){
+            if (!file_exists($temp) && $fallback && isset($val["fallback"])) {
                 $temp = str_replace($key, $val["fallback"], $path);
             }
 
@@ -138,7 +154,7 @@ class FileManager
     }
 
 
-     /**
+    /**
      * @since 0.9.0
      */
     static function getRespTemplatesDirectoryUri($path = "")
@@ -175,7 +191,7 @@ class FileManager
 
         $base = $pathInfo["scheme"] . "://" . $pathInfo["host"] . "/";
 
-        return self::uriJoin(...array_merge([$base , $pathInfo["path"]], $args));
+        return self::uriJoin(...array_merge([$base, $pathInfo["path"]], $args));
     }
 
 
@@ -185,6 +201,67 @@ class FileManager
     static function getRespDirectory(...$args)
     {
         return self::pathJoin(...array_merge([get_template_directory()], $args));
+    }
+
+    /**
+     * @since 0.9.0
+     */
+    static function getTotalSize($dir)
+    {
+        $dir = rtrim(str_replace('\\', '/', $dir), '/');
+
+        if (is_dir($dir) === true) {
+            $totalSize = 0;
+            $os        = strtoupper(substr(PHP_OS, 0, 3));
+            // If on a Unix Host (Linux, Mac OS)
+            if ($os !== 'WIN') {
+                $io = popen('/usr/bin/du -sb ' . $dir, 'r');
+                if ($io !== false) {
+                    $totalSize = intval(fgets($io, 80));
+                    pclose($io);
+                    return $totalSize;
+                }
+            }
+            // If on a Windows Host (WIN32, WINNT, Windows)
+            if ($os === 'WIN' && extension_loaded('com_dotnet')) {
+                $obj = new \COM('scripting.filesystemobject');
+                if (is_object($obj)) {
+                    $ref       = $obj->getfolder($dir);
+                    $totalSize = $ref->size;
+                    $obj       = null;
+                    return $totalSize;
+                }
+            }
+            // If System calls did't work, use slower PHP 5
+            $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+            foreach ($files as $file) {
+                $totalSize += $file->getSize();
+            }
+            return $totalSize;
+        } else if (is_file($dir) === true) {
+            return filesize($dir);
+        }
+    }
+
+    /**
+     * @since 0.9.0
+     */
+    static function convertToBytes(string $from): ?int {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+        $number = substr($from, 0, -2);
+        $suffix = strtoupper(substr($from,-2));
+    
+        //B or no suffix
+        if(is_numeric(substr($suffix, 0, 1))) {
+            return preg_replace('/[^\d]/', '', $from);
+        }
+    
+        $exponent = array_flip($units)[$suffix] ?? null;
+        if($exponent === null) {
+            return null;
+        }
+    
+        return $number * (1024 ** $exponent);
     }
 
 

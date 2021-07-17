@@ -8,6 +8,7 @@
 namespace Resp;
 
 use \Resp\ThemeBuilder , \Resp\FileManager as fm;
+use stdClass;
 
 defined('RESP_VERSION') or die;
 
@@ -27,12 +28,71 @@ class Communicator
 
         $clazz = get_called_class();
 
-        add_action( "wp_ajax_resp_fetch_version_data" , "$clazz::fetchVersionData");
+        //delete_transient("wpresp_update_resp");
+
+        add_filter('site_transient_update_themes', "$clazz::push_update");
+
+        //add_action( "wp_ajax_resp_fetch_version_data" , "$clazz::fetchVersionData");
 
         add_action( "wp_ajax_resp_fetch_dashboard_data" , "$clazz::fetchDashboardData");
 
         add_action( "wp_ajax_resp_request_backup" , "$clazz::downloadBackupData");
 
+    }
+
+
+    /**
+     * @since 0.9.2
+     */
+    static function push_update($transient){
+
+        if (empty($transient->checked)) {
+            return $transient;
+        }
+
+        $slug = 'resp';
+
+        $version = '0.8';
+
+        $transientName =  "wpresp_update_$slug";
+
+        if (false == $response = get_transient($transientName)) {
+
+            $response = wp_remote_get(
+                "https://wp-resp.com/archive/$slug.json",
+                array(
+                    'timeout' => 10,
+                    'headers' => array(
+                        'Accept' => 'application/json'
+                    )
+                )
+            );
+
+            if (!is_wp_error($response) && isset($response['response']['code']) && $response['response']['code'] == 200 && !empty($response['body'])) {
+                set_transient($transientName, $response, 43200);
+            }
+        }
+
+        if ($response && !is_wp_error($response)) {
+            
+            $data = json_decode($response['body'] , true);
+
+            if ($data && version_compare($version, $data["version"], '<') && version_compare($data["requires"], get_bloginfo('version'), '<')) {
+                $res = new stdClass();
+                $res->theme = $slug;
+                $res->new_version = $data["version"];
+                $res->package = $data["download_url"];
+                $res->url = $data["homepage"];
+                $res->requires_php = $data["requires_php"];
+                $data["url"] =  $data["homepage"];
+                $data["new_version"] = $res->new_version;
+                $data["package"] = $res->package;
+                $transient->response[$res->theme] = $data;
+            }
+
+        }
+
+        return $transient;
     }
 
 

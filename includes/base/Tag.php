@@ -743,6 +743,10 @@ class Tag
             $chkbox->attr("checked", true);
         }
 
+        if(empty($label)){
+            return $chkbox;
+        }
+
         return self::create([
             "name" => "label",
             "content" => $label,

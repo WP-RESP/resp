@@ -53,7 +53,7 @@ class ThemeBuilder
     /**
      * @since 0.9.0
      */
-    static function addStaticData($data)
+    static function addStaticData($data , $base)
     {
 
         if (is_string($data)) {
@@ -64,6 +64,14 @@ class ThemeBuilder
         {
             return;
         }
+
+        array_walk_recursive($data , function(&$item , $key) use ($base){
+
+            if(is_string($item) && __resp_str_startsWith($item, "~/")){
+                $item = str_replace("~/" , $base . "/", $item);
+            }
+
+        });
 
         self::$staticData = array_merge_recursive(self::$staticData, $data);
 
@@ -111,7 +119,9 @@ class ThemeBuilder
                 continue;
             }
 
-            self::addStaticData(file_get_contents($path));
+            $dir = pathinfo($path , PATHINFO_DIRNAME);
+
+            self::addStaticData(file_get_contents($path), fm::pathToUrl($dir));
 
         }
     }
